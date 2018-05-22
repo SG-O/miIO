@@ -1,0 +1,11 @@
+before_script:
+  - javac -version
+
+maven_test:
+  stage: test
+  script:
+    - "mvn test"
+    - "cat target/site/jacoco/index.html"
+  artifacts:
+    paths:
+      - target/site/jacoco/
