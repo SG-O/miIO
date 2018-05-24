@@ -1,5 +1,6 @@
 package baseTest;
 
+import base.Token;
 import util.ByteArray;
 import org.junit.Test;
 

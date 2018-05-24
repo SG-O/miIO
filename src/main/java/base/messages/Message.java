@@ -1,6 +1,6 @@
-package baseTest;
+package base.messages;
 
-import org.json.JSONArray;
+import base.Token;
 import org.json.JSONObject;
 import util.ByteArray;
 
@@ -13,39 +13,33 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 @SuppressWarnings("WeakerAccess")
-public class Message {
+public abstract class Message {
     private static final short HEADER = 0x2131;
-    private static final int HELLO_UNKNOWN = ByteArray.UNSIGNED_FFFFFFFF;
-    private static final int NORMAL_UNKNOWN = 0;
+    static final int HELLO_UNKNOWN = ByteArray.UNSIGNED_FFFFFFFF;
+    static final int HELLO_DEVICE_ID = ByteArray.UNSIGNED_FFFFFFFF;
+    static final int HELLO_TIME_STAMP = ByteArray.UNSIGNED_FFFFFFFF;
+    static final int NORMAL_UNKNOWN = 0;
 
     private Token token;
     private int unknownHeader;
     private int deviceID;
     private int timeStamp;
 
-    private long methodID;
-    private String method;
-    private JSONArray params;
+    private long payloadID;
 
-    public Message(Token token, int deviceID, int timeStamp, long methodID, String method, JSONArray params) {
+    private boolean valid;
+
+    public Message(Token token, int unknownHeader, int deviceID, int timeStamp, long payloadID) {
         if (token == null) {
             this.token = new Token("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",16);
-            this.unknownHeader = HELLO_UNKNOWN;
-            if (deviceID <= 0 || timeStamp <= 0) {
-                deviceID = ByteArray.UNSIGNED_FFFFFFFF;
-                timeStamp = ByteArray.UNSIGNED_FFFFFFFF;
-            }
         } else {
-            this.unknownHeader = NORMAL_UNKNOWN;
             this.token = token;
         }
+        this.unknownHeader = unknownHeader;
         this.deviceID = deviceID;
         this.timeStamp = timeStamp;
-        this.methodID = methodID;
-        if (method == null) method = "";
-        this.method = method;
-        if (params == null) params = new JSONArray();
-        this.params = params;
+        this.payloadID = payloadID;
+        valid = true;
     }
 
     public Message(byte[] message, Token token) {
@@ -55,7 +49,7 @@ public class Message {
             this.token = token;
         }
         if (!testMessage(message)){
-            initialEmpty();
+            valid = false;
         } else {
             byte[] worker = new byte[4];
             System.arraycopy(message, 4, worker, 0, 4);
@@ -84,21 +78,14 @@ public class Message {
                     for (i = 0; i < payload.length && payload[i] != 0; i++) { }
                     String pl = new String(payload, 0, i, charset);
                     JSONObject ob = new JSONObject(pl);
-                    this.methodID = ob.optLong("id");
-                    this.method = ob.optString("method");
-                    this.params = ob.optJSONArray("params");
-                    if (this.params == null) this.params = ob.optJSONArray("result");
-                    if (this.params == null) {
-                        this.params = new JSONArray();
-                        JSONObject result = ob.optJSONObject("result");
-                        if (result != null) this.params.put(result);
-                    }
+                    this.payloadID = ob.optLong("id");
                 }
             }
+            valid = true;
         }
     }
 
-    private boolean testMessage(byte[] message) {
+    boolean testMessage(byte[] message) {
         if (message == null) {
             return false;
         } else {
@@ -139,14 +126,6 @@ public class Message {
         }
     }
 
-    private void initialEmpty(){
-        this.unknownHeader = NORMAL_UNKNOWN;
-        deviceID = ByteArray.UNSIGNED_FFFFFFFF;
-        timeStamp = ByteArray.UNSIGNED_FFFFFFFF;
-        method = "";
-        params = new JSONArray();
-    }
-
     public Token getToken() {
         return token;
     }
@@ -163,40 +142,12 @@ public class Message {
         return timeStamp;
     }
 
-    public long getMethodID() {
-        return methodID;
+    public long getPayloadID() {
+        return payloadID;
     }
 
-    public String getMethod() {
-        return method;
-    }
-
-    public JSONArray getParams() {
-        return params;
-    }
-
-    public String constructPayload(){
-        StringBuilder builder = new StringBuilder();
-        builder.append("{\"id\": ");
-        builder.append(methodID);
-        builder.append(", \"method\": \"");
-        builder.append(method);
-        builder.append("\"");
-        if (params.length() > 0) {
-            builder.append(", \"params\": ");
-            if (params.length() == 1){
-                JSONObject obj = params.optJSONObject(0);
-                if (obj != null) {
-                    builder.append(obj.toString());
-                } else {
-                    builder.append(params.toString());
-                }
-            } else {
-                builder.append(params.toString());
-            }
-        }
-        builder.append("}");
-        return builder.toString();
+    public boolean isValid() {
+        return valid;
     }
 
     private byte[] getBytePayload(String payload){
@@ -214,17 +165,8 @@ public class Message {
         return this.token.encrypt(getBytePayload(payload));
     }
 
-    public byte[] create() {
-        String payload;
-        if (isHello()) {
-            payload = null;
-        } else {
-            payload = constructPayload();
-        }
-        return create(payload);
-    }
-
     public byte[] create(String pl) {
+        if (!valid) return null;
         byte[] payload = new byte[0];
         if (pl != null) {
             payload = getPayload(pl);

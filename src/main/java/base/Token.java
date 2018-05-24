@@ -1,4 +1,4 @@
-package baseTest;
+package base;
 
 import util.ByteArray;
 
@@ -62,9 +62,7 @@ public class Token {
 
     @Override
     public String toString() {
-        return "Token{" +
-                "token=" + Arrays.toString(token) +
-                '}';
+        return ByteArray.bytesToHex(token).toLowerCase();
     }
 
     public byte[] encrypt(byte[] msg) {
