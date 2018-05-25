@@ -22,6 +22,7 @@ public class Device {
     private InetAddress ip;
     private Token token;
     private int retries;
+    private String[] acceptableModels;
 
     private DatagramSocket socket;
 
@@ -30,9 +31,10 @@ public class Device {
 
     private long methodID;
 
-    public Device(InetAddress ip, Token token, int timeout, int retries) {
+    public Device(InetAddress ip, Token token, String[] acceptableModels, int timeout, int retries) {
         this.ip = ip;
         this.token = token;
+        this.acceptableModels = acceptableModels;
         if (timeout < 1) timeout = 1000;
         if (retries < 0) retries = 0;
         this.retries = retries;
@@ -44,13 +46,13 @@ public class Device {
 
     }
 
-    private boolean hello(InetAddress broadcast, String[] acceptableModels) {
+    private boolean hello(InetAddress broadcast) {
         if (socket == null) return false;
         Command hello = new Command();
         byte[] helloMsg = hello.create();
         DatagramPacket packet;
         if (ip == null){
-            if (acceptableModels == null) return false;
+            if (this.acceptableModels == null) return false;
             packet = new DatagramPacket(helloMsg, helloMsg.length, broadcast, PORT);
         } else {
             packet = new DatagramPacket(helloMsg, helloMsg.length, ip, PORT);
@@ -83,9 +85,9 @@ public class Device {
         if (!((response.getDeviceID() == -1) || (response.getTimeStamp() == -1))){
             deviceID = response.getDeviceID();
             timeStamp = response.getTimeStamp();
-            if (acceptableModels != null){
+            if (this.acceptableModels != null){
                 boolean modelOk = false;
-                for (String s: acceptableModels) {
+                for (String s: this.acceptableModels) {
                     try {
                         if (s.equals(model())) modelOk = true;
                     } catch (CommandExecutionException ignored) {
@@ -98,13 +100,13 @@ public class Device {
         return false;
     }
 
-    public boolean discover(String[] acceptableModels){
+    public boolean discover(){
         boolean helloResponse = false;
         for (int helloRetries = this.retries; helloRetries >= 0; helloRetries--) {
             List<InetAddress> broadcast = listAllBroadcastAddresses();
             if (broadcast == null) return false;
             for (InetAddress i : broadcast) {
-                if (hello(i, acceptableModels)) {
+                if (hello(i)) {
                     helloResponse = true;
                     break;
                 }
@@ -117,13 +119,13 @@ public class Device {
         return helloResponse;
     }
 
-    public Response send(String method, Object params, String[] acceptableModels) throws CommandExecutionException {
-        return send(method, params, acceptableModels, this.retries);
+    public Response send(String method, Object params) throws CommandExecutionException {
+        return send(method, params, this.retries);
     }
 
-    private Response send(String method, Object params, String[] acceptableModels, int sendRetries) throws CommandExecutionException {
+    private Response send(String method, Object params, int sendRetries) throws CommandExecutionException {
         if (deviceID == -1 || timeStamp == -1 || token == null || ip == null) {
-            if (!discover(acceptableModels)) throw new CommandExecutionException(CommandExecutionException.Error.DEVICE_NOT_FOUND);
+            if (!discover()) throw new CommandExecutionException(CommandExecutionException.Error.DEVICE_NOT_FOUND);
         }
         if (methodID >= 10000) methodID = 1;
         if (ip == null || token == null) throw new CommandExecutionException(CommandExecutionException.Error.IP_OR_TOKEN_UNKNOWN);
@@ -139,7 +141,7 @@ public class Device {
         } catch (SocketTimeoutException to){
             if (sendRetries > 0){
                 sendRetries--;
-                return send(method, params, acceptableModels, sendRetries);
+                return send(method, params, sendRetries);
             }
             throw new CommandExecutionException(CommandExecutionException.Error.TIMEOUT);
         } catch (IOException e) {
@@ -151,7 +153,7 @@ public class Device {
         } catch (SocketTimeoutException to){
             if (sendRetries > 0){
                 sendRetries--;
-                return send(method, params, acceptableModels, sendRetries);
+                return send(method, params, sendRetries);
             }
             throw new CommandExecutionException(CommandExecutionException.Error.TIMEOUT);
         } catch (IOException e) {
@@ -162,22 +164,22 @@ public class Device {
         int length = (int)ByteArray.fromBytes(worker);
         worker = new byte[length];
         System.arraycopy(rcv, 0, worker, 0, length);
-        return parseResponse(worker, method, params, acceptableModels, sendRetries);
+        return parseResponse(worker, method, params, sendRetries);
     }
 
-    private Response parseResponse(byte[] rawData, String method, Object params, String[] acceptableModels, int sendRetries) throws CommandExecutionException {
+    private Response parseResponse(byte[] rawData, String method, Object params, int sendRetries) throws CommandExecutionException {
         Response response = new Response(rawData, this.token);
         if (!response.isValid()) {
             if (sendRetries > 0){
                 sendRetries--;
-                return send(method, params, acceptableModels, sendRetries);
+                return send(method, params, sendRetries);
             }
             throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         }
         if (response.getPayloadID() != (methodID - 1)){
             if (sendRetries > 0){
                 sendRetries--;
-                return send(method, params, acceptableModels, sendRetries);
+                return send(method, params, sendRetries);
             }
             throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         }
@@ -185,7 +187,7 @@ public class Device {
             if (response.getParams() == null) {
                 if (sendRetries > 0){
                     sendRetries--;
-                    return send(method, params, acceptableModels, sendRetries);
+                    return send(method, params, sendRetries);
                 }
                 throw new CommandExecutionException(CommandExecutionException.Error.EMPTY_RESPONSE);
             }
@@ -224,44 +226,64 @@ public class Device {
         return broadcastList;
     }
 
-    public JSONObject info() throws CommandExecutionException {
-        Response resp = send("miIO.info", null, null);
-        if (resp == null) return null;
-        if (resp.getParams() == null) return null;
-        if (resp.getParams().getClass() != JSONObject.class) return null;
+    public JSONObject sendToObject(String method, Object params) throws CommandExecutionException {
+        Response resp = send(method, params);
+        if (resp == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (resp.getParams() == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (resp.getParams().getClass() != JSONObject.class) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return (JSONObject)resp.getParams();
     }
 
+    public JSONObject sendToObject(String method) throws CommandExecutionException {
+        return sendToObject(method, null);
+    }
+
+    public JSONArray sendToArray(String method, Object params) throws CommandExecutionException {
+        Response resp = send(method, params);
+        if (resp == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (resp.getParams() == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (resp.getParams().getClass() != JSONArray.class) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        return (JSONArray)resp.getParams();
+    }
+
+    public JSONArray sendToArray(String method) throws CommandExecutionException {
+        return sendToArray(method, null);
+    }
+
+    public boolean sendOk(String method, Object params) throws CommandExecutionException {
+        return sendToArray(method, params).optString(0).toLowerCase().equals("ok");
+    }
+
+    public boolean sendOk(String method) throws CommandExecutionException {
+        return sendOk(method, null);
+    }
+
+    public JSONObject info() throws CommandExecutionException {
+        return sendToObject("miIO.info");
+    }
+
     public boolean update(String url, String md5) throws CommandExecutionException {
-        if (url == null || md5 == null) return false;
-        if (md5.length() != 32) return false;
+        if (url == null || md5 == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (md5.length() != 32) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         JSONObject params = new JSONObject();
         params.put("mode","normal");
         params.put("install", "1");
         params.put("app_url", url);
         params.put("file_md5", md5);
         params.put("proc", "dnld install");
-        Response resp = send("miIO.ota", params, null);
-        if (resp == null) return false;
-        if (resp.getParams() == null) return false;
-        if (resp.getParams().getClass() != JSONArray.class) return false;
-        return ((JSONArray)resp.getParams()).optString(0).toLowerCase().equals("ok");
+        return sendOk("miIO.ota", params);
     }
 
     public int updateProgress() throws CommandExecutionException {
-        Response resp = send("miIO.get_ota_progress", null, null);
-        if (resp == null) return -1;
-        if (resp.getParams() == null) return -1;
-        if (resp.getParams().getClass() != JSONArray.class) return -1;
-        return ((JSONArray)resp.getParams()).optInt(0, -1);
+        int resp = sendToArray("miIO.get_ota_progress").optInt(0, -1);
+        if ((resp < 0) || (resp > 100)) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        return resp;
     }
 
     public String updateStatus() throws CommandExecutionException {
-        Response resp = send("miIO.get_ota_state", null, null);
-        if (resp == null) return null;
-        if (resp.getParams() == null) return null;
-        if (resp.getParams().getClass() != JSONArray.class) return null;
-        return ((JSONArray)resp.getParams()).optString(0);
+        String resp = sendToArray("miIO.get_ota_state").optString(0, null);
+        if (resp == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        return resp;
     }
 
     public boolean configureRouter(String ssid, String password) throws CommandExecutionException {
@@ -269,27 +291,23 @@ public class Device {
     }
 
     public boolean configureRouter(String ssid, String password, int uid) throws CommandExecutionException {
-        if (ssid == null || password == null) return false;
+        if (ssid == null || password == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         JSONObject params = new JSONObject();
         params.put("ssid",ssid);
         params.put("passwd", password);
         params.put("uid", uid);
-        Response resp = send("miIO.config_router", params, null);
-        if (resp == null) return false;
-        if (resp.getParams() == null) return false;
-        if (resp.getParams().getClass() != JSONArray.class) return false;
-        return ((JSONArray)resp.getParams()).optString(0).toLowerCase().equals("ok");
+        return sendOk("miIO.config_router", params);
     }
 
     public String model() throws CommandExecutionException {
         JSONObject in = info();
-        if (in == null) return null;
+        if (in == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return in.optString("model");
     }
 
     public String firmware() throws CommandExecutionException {
         JSONObject in = info();
-        if (in == null) return null;
+        if (in == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return in.optString("fw_ver");
     }
 }
