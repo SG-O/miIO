@@ -1,6 +1,5 @@
 package serverTest;
 
-import base.CommandExecutionException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import server.OnServerEventListener;
