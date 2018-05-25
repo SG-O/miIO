@@ -8,7 +8,7 @@ public class CommandExecutionException extends Exception {
         EMPTY_RESPONSE(3),
         INVALID_RESPONSE(4),
         IP_OR_TOKEN_UNKNOWN(5);
-        public final int cause;   // Symbol of unit
+        public final int cause;
 
         Error(int cause) {
             this.cause = cause;
