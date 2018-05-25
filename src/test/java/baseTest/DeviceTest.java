@@ -4,6 +4,7 @@ import base.CommandExecutionException;
 import base.Device;
 import base.Token;
 import device.vacuum.Vacuum;
+import device.vacuum.VacuumStatus;
 import org.json.JSONObject;
 import org.junit.Test;
 import server.Server;
@@ -91,17 +92,17 @@ public class DeviceTest {
         ts1.setLifeTime(ts1.getLifeTime() + 100);
         assertEquals(lifetime + 100, d1.info().optLong("life"));
 
-        assertEquals(3, d1.status().optInt("state"));
+        assertEquals(VacuumStatus.State.UNKNOWN, d1.status().getState());
         assertTrue(d1.start());
-        assertEquals(5, d1.status().optInt("state"));
+        assertEquals(VacuumStatus.State.CLEANING, d1.status().getState());
         assertTrue(d1.pause());
-        assertEquals(10, d1.status().optInt("state"));
+        assertEquals(VacuumStatus.State.PAUSED, d1.status().getState());
         assertTrue(d1.home());
-        assertEquals(8, d1.status().optInt("state"));
+        assertEquals(VacuumStatus.State.CHARGING, d1.status().getState());
         assertTrue(d1.spotCleaning());
-        assertEquals(17, d1.status().optInt("state"));
+        assertEquals(VacuumStatus.State.SPOT_CLEANUP, d1.status().getState());
         assertTrue(d1.stop());
-        assertEquals(3, d1.status().optInt("state"));
+        assertEquals(VacuumStatus.State.IDLE, d1.status().getState());
 
         assertTrue(d1.findMe());
 

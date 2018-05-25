@@ -1,21 +1,12 @@
 package serverTest;
 
+import device.vacuum.VacuumStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import server.OnServerEventListener;
 
 public class ServerVacuumEvents implements OnServerEventListener {
-    private boolean dndEnabled = false;
-    private boolean mapPresent = false;
-    private int cleanArea = 0;
-    private int fanPower = 60;
-    private int msgVersion = 8;
-    private boolean inCleaning = false;
-    private int errorCode = 0;
-    private int state = 3;
-    private int battery = 100;
-    private int msgSeq = 0;
-    private int cleanTime = 0;
+    private VacuumStatus state = new VacuumStatus(null);
 
     private int mainBrushWork = 0;
     private int sensorDirty = 0;
@@ -64,19 +55,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     }
 
     private Object status(){
-        JSONObject payload = new JSONObject();
-        payload.put("dnd_enabled", dndEnabled ? 1 : 0);
-        payload.put("map_present", mapPresent ? 1 : 0);
-        payload.put("clean_area", cleanArea);
-        payload.put("fan_power", fanPower);
-        payload.put("msg_ver", msgVersion);
-        payload.put("in_cleaning", inCleaning ? 1 : 0);
-        payload.put("error_code", errorCode);
-        payload.put("state", state);
-        payload.put("battery", battery);
-        payload.put("msg_seq", msgSeq);
-        payload.put("clean_time", cleanTime);
-
+        JSONObject payload = state.construct();
         JSONArray ret = new JSONArray();
         ret.put(payload);
         return ret;
@@ -96,7 +75,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
 
     private Object getFanSpeed(){
         JSONArray ret = new JSONArray();
-        ret.put(fanPower);
+        ret.put(state.getFanPower());
         return ret;
     }
 
@@ -104,32 +83,32 @@ public class ServerVacuumEvents implements OnServerEventListener {
         if (params == null) return null;
         int speed = params.optInt(0, -1);
         if ((speed < 0) || (speed > 100)) return null;
-        this.fanPower = speed;
+        state.setFanPower(speed);
         return ok();
     }
 
     private Object start()  {
-        state = 5;
+        state.setState(VacuumStatus.State.CLEANING);
         return ok();
     }
 
     private Object pause() {
-        state = 10;
+        state.setState(VacuumStatus.State.PAUSED);
         return ok();
     }
 
     private Object stop() {
-        state = 3;
+        state.setState(VacuumStatus.State.IDLE);
         return ok();
     }
 
     private Object home() {
-        state = 8;
+        state.setState(VacuumStatus.State.CHARGING);
         return ok();
     }
 
     private Object spotCleaning() {
-        state = 17;
+        state.setState(VacuumStatus.State.SPOT_CLEANUP);
         return ok();
     }
 

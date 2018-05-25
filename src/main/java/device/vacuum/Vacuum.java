@@ -14,11 +14,11 @@ public class Vacuum extends Device {
         super(ip, token, new String[]{"rockrobo.vacuum.v1", "rockrobo.vacuum.v2"}, timeout, retries);
     }
 
-    public JSONObject status() throws CommandExecutionException {
+    public VacuumStatus status() throws CommandExecutionException {
         JSONArray resp = sendToArray("get_status");
         JSONObject stat = resp.optJSONObject(0);
         if (stat == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-        return stat;
+        return new VacuumStatus(stat);
     }
 
     public JSONObject consumableStatus() throws CommandExecutionException {
