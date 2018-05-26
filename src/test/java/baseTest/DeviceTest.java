@@ -116,7 +116,7 @@ public class DeviceTest {
         assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
         evCleaner.getConsumables().setMainBrushWorkTime(10000);
         assertEquals(10000, d1.consumableStatus().getMainBrushWorkTime());
-        d1.resetConsumable(VacuumConsumableStatus.Names.MAIN_BRUSH);
+        assertTrue(d1.resetConsumable(VacuumConsumableStatus.Names.MAIN_BRUSH));
         assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
 
         ts1.terminate();

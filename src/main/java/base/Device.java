@@ -31,6 +31,14 @@ public class Device {
 
     private long methodID;
 
+    /**
+     * Baseclass for all miIO devices.
+     * @param ip The IP address of the device to connect to. If the address is null the first device that is an acceptableModel will be chosen.
+     * @param token The token for that device. If the token is null the token will be extracted from unprovisioned devices.
+     * @param acceptableModels An array of acceptable devices to connect to.
+     * @param timeout The timeout for the communication
+     * @param retries The number of retries after a failed communication
+     */
     public Device(InetAddress ip, Token token, String[] acceptableModels, int timeout, int retries) {
         this.ip = ip;
         this.token = token;
@@ -46,6 +54,11 @@ public class Device {
 
     }
 
+    /**
+     * Try to connect to a device or discover it.
+     * @param broadcast The InetAddress to broadcast to if no ip was given
+     * @return True if a device was found
+     */
     private boolean hello(InetAddress broadcast) {
         if (socket == null) return false;
         Command hello = new Command();
@@ -100,6 +113,10 @@ public class Device {
         return false;
     }
 
+    /**
+     * Connect to a device and send a Hello message. If no IP has been specified, this will try do discover a device on the network.
+     * @return True if the device has been successfully acquired.
+     */
     public boolean discover(){
         boolean helloResponse = false;
         for (int helloRetries = this.retries; helloRetries >= 0; helloRetries--) {
@@ -119,6 +136,14 @@ public class Device {
         return helloResponse;
     }
 
+
+    /**
+     * Send a command to a device. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @param params The command to execute on the device. Must be a JSONArray or JSONObject.
+     * @return The response from the device.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public Response send(String method, Object params) throws CommandExecutionException {
         return send(method, params, this.retries);
     }
@@ -226,6 +251,13 @@ public class Device {
         return broadcastList;
     }
 
+    /**
+     * Send a command to a device. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @param params The command to execute on the device. Must be a JSONArray or JSONObject.
+     * @return The response from the device as a JSONObject.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONObject sendToObject(String method, Object params) throws CommandExecutionException {
         Response resp = send(method, params);
         if (resp == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
@@ -234,10 +266,23 @@ public class Device {
         return (JSONObject)resp.getParams();
     }
 
+    /**
+     * Send a command to a device without parameters. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @return The response from the device as a JSONObject.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONObject sendToObject(String method) throws CommandExecutionException {
         return sendToObject(method, null);
     }
 
+    /**
+     * Send a command to a device. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @param params The command to execute on the device. Must be a JSONArray or JSONObject.
+     * @return The response from the device as a JSONArray.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONArray sendToArray(String method, Object params) throws CommandExecutionException {
         Response resp = send(method, params);
         if (resp == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
@@ -246,22 +291,53 @@ public class Device {
         return (JSONArray)resp.getParams();
     }
 
+    /**
+     * Send a command to a device without parameters. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @return The response from the device as a JSONArray.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONArray sendToArray(String method) throws CommandExecutionException {
         return sendToArray(method, null);
     }
 
+    /**
+     * Send a command to a device. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @param params The command to execute on the device. Must be a JSONArray or JSONObject.
+     * @return True if a ok was received from the device.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean sendOk(String method, Object params) throws CommandExecutionException {
         return sendToArray(method, params).optString(0).toLowerCase().equals("ok");
     }
 
+    /**
+     * Send a command to a device without parameters. If no IP has been specified, this will try do discover a device on the network.
+     * @param method The method to execute on the device.
+     * @return True if a ok was received from the device.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean sendOk(String method) throws CommandExecutionException {
         return sendOk(method, null);
     }
 
+    /**
+     * Get the device info from the device
+     * @return The device info as a JSONObject
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONObject info() throws CommandExecutionException {
         return sendToObject("miIO.info");
     }
 
+    /**
+     * Command the device to update
+     * @param url The URL to update from
+     * @param md5 The MD5 Checksum for the update
+     * @return True if the command has been received. This does not mean that the update was successful.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean update(String url, String md5) throws CommandExecutionException {
         if (url == null || md5 == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         if (md5.length() != 32) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
@@ -274,18 +350,35 @@ public class Device {
         return sendOk("miIO.ota", params);
     }
 
+    /**
+     * Request the update progress as a percentage value from 0 to 100
+     * @return The current progress.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public int updateProgress() throws CommandExecutionException {
         int resp = sendToArray("miIO.get_ota_progress").optInt(0, -1);
         if ((resp < 0) || (resp > 100)) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return resp;
     }
 
+    /**
+     * Request the update status.
+     * @return The update status.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public String updateStatus() throws CommandExecutionException {
         String resp = sendToArray("miIO.get_ota_state").optString(0, null);
         if (resp == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return resp;
     }
 
+    /**
+     * Set the deviced network connection up.
+     * @param ssid The SSID to device should connect to
+     * @param password The password for that connection
+     * @return True if the command was received successfully. This does not mean that the connection has been correctly established.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean configureRouter(String ssid, String password) throws CommandExecutionException {
         return configureRouter(ssid, password, 0);
     }
@@ -299,12 +392,23 @@ public class Device {
         return sendOk("miIO.config_router", params);
     }
 
+
+    /**
+     * Get the devices model id.
+     * @return The devices model id.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public String model() throws CommandExecutionException {
         JSONObject in = info();
         if (in == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return in.optString("model");
     }
 
+    /**
+     * Get the devices firmware version.
+     * @return The devices current firmware version.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public String firmware() throws CommandExecutionException {
         JSONObject in = info();
         if (in == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);

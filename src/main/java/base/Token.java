@@ -16,17 +16,30 @@ public class Token {
 
     private byte[] token;
 
+    /**
+     * Create a token from a byte array.
+     * @param token The byte array to use.
+     */
     public Token(byte[] token) {
         if (token == null) token = new byte[0];
         this.token = token;
     }
 
+    /**
+     * Generate a token from a string of hexadecimal values.
+     * @param token The value tho convert.
+     * @param fallbackLength If the conversion fails a token of 0s with this length will be generated.
+     */
     public Token(String token, int fallbackLength) {
         byte[] tmp = ByteArray.hexToBytes(token);
         if (tmp == null) tmp = new byte[fallbackLength];
         this.token = tmp;
     }
 
+    /**
+     * Get the token as a byte array.
+     * @return The token as a byte array.
+     */
     public byte[] getToken() {
         return token;
     }
