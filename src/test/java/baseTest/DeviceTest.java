@@ -112,7 +112,7 @@ public class DeviceTest {
         assertTrue(d1.setFanSpeed(60));
         assertEquals(60, d1.getFanSpeed());
 
-        assertEquals(0, d1.consumableStatus().optInt("main_brush_work_time"));
+        assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
 
         ts1.terminate();
     }

@@ -21,11 +21,11 @@ public class Vacuum extends Device {
         return new VacuumStatus(stat);
     }
 
-    public JSONObject consumableStatus() throws CommandExecutionException {
+    public VacuumConsumableStatus consumableStatus() throws CommandExecutionException {
         JSONArray resp = sendToArray("get_consumable");
         JSONObject stat = resp.optJSONObject(0);
         if (stat == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-        return stat;
+        return new VacuumConsumableStatus(stat);
     }
 
     public boolean start() throws CommandExecutionException {

@@ -1,5 +1,6 @@
 package serverTest;
 
+import device.vacuum.VacuumConsumableStatus;
 import device.vacuum.VacuumStatus;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -7,11 +8,7 @@ import server.OnServerEventListener;
 
 public class ServerVacuumEvents implements OnServerEventListener {
     private VacuumStatus state = new VacuumStatus(null);
-
-    private int mainBrushWork = 0;
-    private int sensorDirty = 0;
-    private int sideBrushWork = 0;
-    private int filterWork = 0;
+    private VacuumConsumableStatus consumables = new VacuumConsumableStatus(null);
 
     public ServerVacuumEvents() {
     }
@@ -55,21 +52,14 @@ public class ServerVacuumEvents implements OnServerEventListener {
     }
 
     private Object status(){
-        JSONObject payload = state.construct();
         JSONArray ret = new JSONArray();
-        ret.put(payload);
+        ret.put(state.construct());
         return ret;
     }
 
     private Object consumableStatus(){
-        JSONObject payload = new JSONObject();
-        payload.put("main_brush_work_time", mainBrushWork);
-        payload.put("sensor_dirty_time", sensorDirty);
-        payload.put("side_brush_work_time", sideBrushWork);
-        payload.put("filter_work_time", filterWork);
-
         JSONArray ret = new JSONArray();
-        ret.put(payload);
+        ret.put(consumables.construct());
         return ret;
     }
 
