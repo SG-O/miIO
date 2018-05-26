@@ -28,6 +28,12 @@ public class Vacuum extends Device {
         return new VacuumConsumableStatus(stat);
     }
 
+    public boolean resetConsumable(VacuumConsumableStatus.Names consumable) throws CommandExecutionException {
+        JSONArray params = new JSONArray();
+        params.put(consumable.toString());
+        return sendOk("reset_consumable", params);
+    }
+
     public boolean start() throws CommandExecutionException {
         return sendOk("app_start");
     }

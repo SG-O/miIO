@@ -6,10 +6,23 @@ import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
 public class VacuumConsumableStatus {
-    public static final String MAIN_BRUSH_NAME = "main_brush_work_time";
-    public static final String SIDE_BRUSH_NAME = "side_brush_work_time";
-    public static final String FILTER_NAME = "filter_work_time";
-    public static final String SENSOR_NAME = "sensor_dirty_time";
+    public enum Names {
+        MAIN_BRUSH("main_brush_work_time"),
+        SIDE_BRUSH("side_brush_work_time"),
+        FILTER("filter_work_time"),
+        SENSOR("sensor_dirty_time");
+
+        private final String name;
+
+        Names(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
 
     public static final int MAIN_BRUSH_TIME_BETWEEN_CHANGE = 300 * 3600;
     public static final int SIDE_BRUSH_TIME_BETWEEN_CHANGE = 200 * 3600;
@@ -30,20 +43,27 @@ public class VacuumConsumableStatus {
 
     public VacuumConsumableStatus(JSONObject consumables) {
         if (consumables != null) {
-            this.mainBrushWorkTime = consumables.optInt(MAIN_BRUSH_NAME);
-            this.sensorTimeSinceCleaning = consumables.optInt(SENSOR_NAME);
-            this.sideBrushWorkTime = consumables.optInt(SIDE_BRUSH_NAME);
-            this.filterWorkTime = consumables.optInt(FILTER_NAME);
+            this.mainBrushWorkTime = consumables.optInt(Names.MAIN_BRUSH.toString());
+            this.sensorTimeSinceCleaning = consumables.optInt(Names.SENSOR.toString());
+            this.sideBrushWorkTime = consumables.optInt(Names.SIDE_BRUSH.toString());
+            this.filterWorkTime = consumables.optInt(Names.FILTER.toString());
         }
     }
 
     public JSONObject construct(){
         JSONObject payload = new JSONObject();
-        payload.put(MAIN_BRUSH_NAME, mainBrushWorkTime);
-        payload.put(SENSOR_NAME, sensorTimeSinceCleaning);
-        payload.put(SIDE_BRUSH_NAME, sideBrushWorkTime);
-        payload.put(FILTER_NAME, filterWorkTime);
+        payload.put(Names.MAIN_BRUSH.toString(), mainBrushWorkTime);
+        payload.put(Names.SENSOR.toString(), sensorTimeSinceCleaning);
+        payload.put(Names.SIDE_BRUSH.toString(), sideBrushWorkTime);
+        payload.put(Names.FILTER.toString(), filterWorkTime);
         return payload;
+    }
+
+    public void reset(String name){
+        if (name.equals(Names.MAIN_BRUSH.toString())) mainBrushWorkTime = 0;
+        if (name.equals(Names.SENSOR.toString())) sensorTimeSinceCleaning = 0;
+        if (name.equals(Names.SIDE_BRUSH.toString())) sideBrushWorkTime = 0;
+        if (name.equals(Names.FILTER.toString())) filterWorkTime = 0;
     }
 
     public int getMainBrushWorkTime() {
@@ -60,6 +80,22 @@ public class VacuumConsumableStatus {
 
     public int getFilterWorkTime() {
         return filterWorkTime;
+    }
+
+    public void setMainBrushWorkTime(int mainBrushWorkTime) {
+        this.mainBrushWorkTime = mainBrushWorkTime;
+    }
+
+    public void setSensorTimeSinceCleaning(int sensorTimeSinceCleaning) {
+        this.sensorTimeSinceCleaning = sensorTimeSinceCleaning;
+    }
+
+    public void setSideBrushWorkTime(int sideBrushWorkTime) {
+        this.sideBrushWorkTime = sideBrushWorkTime;
+    }
+
+    public void setFilterWorkTime(int filterWorkTime) {
+        this.filterWorkTime = filterWorkTime;
     }
 
     public int getMainBrushWorkTimeLeft() {

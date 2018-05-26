@@ -3,7 +3,6 @@ package serverTest;
 import device.vacuum.VacuumConsumableStatus;
 import device.vacuum.VacuumStatus;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import server.OnServerEventListener;
 
 public class ServerVacuumEvents implements OnServerEventListener {
@@ -13,14 +12,14 @@ public class ServerVacuumEvents implements OnServerEventListener {
     public ServerVacuumEvents() {
     }
 
+    public VacuumConsumableStatus getConsumables() {
+        return consumables;
+    }
+
     @Override
     public Object onCommandListener(String method, Object params) {
-        JSONObject paramsObject = null;
         JSONArray paramsArray = null;
         if (params != null){
-            if (params.getClass() == JSONObject.class){
-                paramsObject = (JSONObject) params;
-            }
             if (params.getClass() == JSONArray.class){
                 paramsArray = (JSONArray) params;
             }
@@ -30,6 +29,8 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return status();
             case "get_consumable":
                 return consumableStatus();
+            case "reset_consumable":
+                return resetConsumableStatus(paramsArray);
             case "get_custom_mode":
                 return getFanSpeed();
             case "set_custom_mode":
@@ -61,6 +62,13 @@ public class ServerVacuumEvents implements OnServerEventListener {
         JSONArray ret = new JSONArray();
         ret.put(consumables.construct());
         return ret;
+    }
+
+    private Object resetConsumableStatus(JSONArray params){
+        if (params == null) return null;
+        String name = params.optString(0, "");
+        consumables.reset(name);
+        return ok();
     }
 
     private Object getFanSpeed(){

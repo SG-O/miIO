@@ -34,6 +34,14 @@ public class VacuumConsumableStatusTest {
         assertEquals(50.0f, s0.getMainBrushWorkPercent(), 0.1f);
         assertEquals(1.3f, s1.getMainBrushWorkPercent(), 0.1f);
         assertEquals(0.0f, s2.getMainBrushWorkPercent(), 0.1f);
+
+        s0.reset(VacuumConsumableStatus.Names.MAIN_BRUSH.toString());
+
+        assertEquals(0, s0.getMainBrushWorkTime());
+
+        s0.setMainBrushWorkTime(1000);
+
+        assertEquals(1000, s0.getMainBrushWorkTime());
     }
 
     @Test
@@ -49,6 +57,14 @@ public class VacuumConsumableStatusTest {
         assertEquals(66.6f, s0.getSensorPercentSinceCleaning(), 0.1f);
         assertEquals(13.0f, s1.getSensorPercentSinceCleaning(), 0.1f);
         assertEquals(0.0f, s2.getSensorPercentSinceCleaning(), 0.1f);
+
+        s0.reset(VacuumConsumableStatus.Names.SENSOR.toString());
+
+        assertEquals(0, s0.getSensorTimeSinceCleaning());
+
+        s0.setSensorTimeSinceCleaning(2000);
+
+        assertEquals(2000, s0.getSensorTimeSinceCleaning());
     }
 
     @Test
@@ -64,6 +80,14 @@ public class VacuumConsumableStatusTest {
         assertEquals(25.0f, s0.getSideBrushWorkPercent(), 0.1f);
         assertEquals(2.0f, s1.getSideBrushWorkPercent(), 0.1f);
         assertEquals(0.0f, s2.getSideBrushWorkPercent(), 0.1f);
+
+        s0.reset(VacuumConsumableStatus.Names.SIDE_BRUSH.toString());
+
+        assertEquals(0, s0.getSideBrushWorkTime());
+
+        s0.setSideBrushWorkTime(3000);
+
+        assertEquals(3000, s0.getSideBrushWorkTime());
     }
 
     @Test
@@ -79,6 +103,14 @@ public class VacuumConsumableStatusTest {
         assertEquals(33.3f, s0.getFilterWorkPercent(), 0.1f);
         assertEquals(2.6f, s1.getFilterWorkPercent(), 0.1f);
         assertEquals(0.0f, s2.getFilterWorkPercent(), 0.1f);
+
+        s0.reset(VacuumConsumableStatus.Names.FILTER.toString());
+
+        assertEquals(0, s0.getFilterWorkTime());
+
+        s0.setFilterWorkTime(4000);
+
+        assertEquals(4000, s0.getFilterWorkTime());
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "ConstantConditions", "ObjectEqualsNull"})

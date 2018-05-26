@@ -4,6 +4,7 @@ import base.CommandExecutionException;
 import base.Device;
 import base.Token;
 import device.vacuum.Vacuum;
+import device.vacuum.VacuumConsumableStatus;
 import device.vacuum.VacuumStatus;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -112,6 +113,10 @@ public class DeviceTest {
         assertTrue(d1.setFanSpeed(60));
         assertEquals(60, d1.getFanSpeed());
 
+        assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
+        evCleaner.getConsumables().setMainBrushWorkTime(10000);
+        assertEquals(10000, d1.consumableStatus().getMainBrushWorkTime());
+        d1.resetConsumable(VacuumConsumableStatus.Names.MAIN_BRUSH);
         assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
 
         ts1.terminate();
