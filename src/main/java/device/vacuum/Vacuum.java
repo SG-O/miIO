@@ -196,22 +196,107 @@ public class Vacuum extends Device {
         return sendOk("close_dnd_timer");
     }
 
-    public JSONArray goTo(Point p) throws CommandExecutionException {
-        if (p == null) return null;
+    /**
+     * Go to the specified position on the map.
+     * @param x The x position to move to in pixel. 512 pixel is the center of the map.
+     * @param y The y position to move to in pixel. 512 pixel is the center of the map.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean goToMapPosition(int x, int y) throws CommandExecutionException {
+        return goTo(x * 0.05f, y * 0.05f);
+    }
+
+    /**
+     * Go to the specified position on the map.
+     * @param x The x position to move to in meters. 25.6 meters is the center of the map.
+     * @param y The y position to move to in meters. 25.6 meters is the center of the map.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean goTo(float x, float y) throws CommandExecutionException {
+        Point p = new Point();
+        p.setLocation(x * 1000d, y * 1000d);
+        return goTo(p);
+    }
+
+    /**
+     * Go to the specified position on the map.
+     * @param p The position to move to in millimeters. 25600 millimeter both in x and y is the center of the map. The origin of the map is 0 millimeters in x and y.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean goTo(Point p) throws CommandExecutionException {
+        if (p == null) return false;
         JSONArray payload = new JSONArray();
         payload.put(p.x);
         payload.put(p.y);
-        return sendToArray("app_goto_target" , payload);
+        return sendOk("app_goto_target" , payload);
     }
 
-    public JSONArray cleanArea(Point bottomLeft, Point topRight, int passes) throws CommandExecutionException {
-        if (bottomLeft == null || topRight == null || passes < 1) return null;
+    /**
+     * Clean the specified area on the map.
+     * @param x0 The x position of the first point defining the area in pixel. 512 pixel is the center of the map.
+     * @param y0 The y position of the first point defining the area in pixel. 512 pixel is the center of the map.
+     * @param x1 The x position of the second point defining the area in pixel. 512 pixel is the center of the map.
+     * @param y1 The y position of the second point defining the area in pixel. 512 pixel is the center of the map.
+     * @param passes The number of times to clean this area.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean cleanAreafromMap(int x0, int y0, int x1, int y1, int passes) throws CommandExecutionException {
+        return cleanArea(x0 * 0.05f, y0 * 0.05f, x1 * 0.05f, y1 * 0.05f, passes);
+    }
+
+    /**
+     * Clean the specified area on the map.
+     * @param x0 The x position of the first point defining the area in meters. 25.6 meters is the center of the map.
+     * @param y0 The y position of the first point defining the area in meters. 25.6 meters is the center of the map.
+     * @param x1 The x position of the second point defining the area in meters. 25.6 meters is the center of the map.
+     * @param y1 The y position of the second point defining the area in meters. 25.6 meters is the center of the map.
+     * @param passes The number of times to clean this area.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean cleanArea(float x0, float y0, float x1, float y1, int passes) throws CommandExecutionException {
+        float t;
+        if (x0 < x1) {
+            t = x0;
+            x0 = x1;
+            x1 = t;
+
+        }
+        if (y0 < y1) {
+            t = y0;
+            y0 = y1;
+            y1 = t;
+
+        }
+        Point p0 = new Point();
+        p0.setLocation(x0 * 1000d, y0 * 1000d);
+        Point p1 = new Point();
+        p1.setLocation(x1 * 1000d, y1 * 1000d);
+        return cleanArea(p0, p1, passes);
+    }
+
+    /**
+     * Clean the specified area on the map.
+     * @param bottomLeft The bottom left position of the area in millimeters. 25600 millimeter both in x and y is the center of the map. The origin of the map is 0 millimeters in x and y.
+     * @param topRight The top right position of the area in millimeters. 25600 millimeter both in x and y is the center of the map. The origin of the map is 0 millimeters in x and y.
+     * @param passes The number of times to clean this area.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean cleanArea(Point bottomLeft, Point topRight, int passes) throws CommandExecutionException {
+        if (bottomLeft == null || topRight == null || passes < 1) return false;
         JSONArray payload = new JSONArray();
         payload.put(bottomLeft.x);
         payload.put(bottomLeft.y);
         payload.put(topRight.x);
         payload.put(topRight.y);
         payload.put(passes);
-        return sendToArray("app_zoned_clean" , payload);
+        JSONArray wrapper = new JSONArray();
+        wrapper.put(payload);
+        return sendOk("app_zoned_clean" , wrapper);
     }
 }

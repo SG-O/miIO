@@ -10,6 +10,7 @@ import server.Server;
 import serverTest.ServerGenericEvents;
 import serverTest.ServerVacuumEvents;
 
+import java.awt.*;
 import java.net.InetAddress;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -146,6 +147,17 @@ public class DeviceTest {
         assertTrue(d1.setDoNotDisturb(new VacuumDoNotDisturb(null, null)));
         assertEquals(new VacuumDoNotDisturb(null, null), d1.getDoNotDisturb());
 
+        assertTrue(d1.goTo(new Point()));
+        assertFalse(d1.goTo(null));
+        assertTrue(d1.goTo(0.0f, 0.0f));
+        assertTrue(d1.goToMapPosition(0, 0));
+
+        assertTrue(d1.cleanArea(new Point(), new Point(), 1));
+        assertFalse(d1.cleanArea(null, new Point(), 1));
+        assertFalse(d1.cleanArea(new Point(), null, 1));
+        assertFalse(d1.cleanArea(new Point(), new Point(), 0));
+        assertTrue(d1.cleanArea(0.0f, 0.0f, 1.0f, 1.0f, 1));
+        assertTrue(d1.cleanAreafromMap(0,0,1,1,1));
         ts1.terminate();
     }
 
