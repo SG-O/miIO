@@ -6,6 +6,7 @@ import base.Token;
 import device.vacuum.Vacuum;
 import device.vacuum.VacuumConsumableStatus;
 import device.vacuum.VacuumStatus;
+import device.vacuum.VacuumTimer;
 import org.json.JSONObject;
 import org.junit.Test;
 import server.Server;
@@ -13,6 +14,7 @@ import serverTest.ServerGenericEvents;
 import serverTest.ServerVacuumEvents;
 
 import java.net.InetAddress;
+import java.time.ZoneId;
 
 import static base.CommandExecutionException.Error.DEVICE_NOT_FOUND;
 import static base.CommandExecutionException.Error.UNKNOWN_METHOD;
@@ -50,7 +52,7 @@ public class DeviceTest {
         Token tk = new Token("00112233445566778899AABBCCDDEEFF", 16);
         Server ts1 = new Server(tk,ts0.getDeviceId() * 2,"rockrobo.vacuum.v1", "3.3.9_003194", ts0.getHardware(),ts0.getNetwork(), ts0.getMacAddress(), ts0.getLifeTime() * 2, ts0.getAccessPoint());
         ts1.start();
-        Vacuum d1 = new Vacuum(InetAddress.getByName("127.0.0.1"), tk, 0, 2);
+        Vacuum d1 = new Vacuum(InetAddress.getByName("127.0.0.1"), tk, 1000000, 2);
         assertEquals(ts1.getMacAddress(), d1.info().optString("mac"));
         assertEquals(ts1.getModel(), d1.model());
         assertEquals(ts1.getFirmware(), d1.firmware());
@@ -118,6 +120,22 @@ public class DeviceTest {
         assertEquals(10000, d1.consumableStatus().getMainBrushWorkTime());
         assertTrue(d1.resetConsumable(VacuumConsumableStatus.Names.MAIN_BRUSH));
         assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
+
+        assertEquals(ZoneId.systemDefault(), d1.getTimezone());
+        assertTrue(d1.setTimezone(ZoneId.of("America/Los_Angeles")));
+        assertEquals(ZoneId.of("America/Los_Angeles"), d1.getTimezone());
+        assertTrue(d1.setTimezone(ZoneId.systemDefault()));
+        assertEquals(ZoneId.systemDefault(), d1.getTimezone());
+
+        VacuumTimer t0 = new VacuumTimer(null, true, 14, 0, null);
+        assertEquals(0, d1.getTimers().length);
+        assertTrue(d1.addTimer(t0));
+        assertEquals(t0, d1.getTimers()[0]);
+        t0.setEnabled(false);
+        assertTrue(d1.setTimerEnabled(t0));
+        assertFalse(d1.getTimers()[0].isEnabled());
+        assertTrue(d1.removeTimer(t0));
+        assertEquals(0, d1.getTimers().length);
 
         ts1.terminate();
     }

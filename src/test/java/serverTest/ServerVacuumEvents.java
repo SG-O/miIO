@@ -1,13 +1,21 @@
 package serverTest;
 
+import base.CommandExecutionException;
 import device.vacuum.VacuumConsumableStatus;
 import device.vacuum.VacuumStatus;
+import device.vacuum.VacuumTimer;
 import org.json.JSONArray;
 import server.OnServerEventListener;
+
+import java.time.ZoneId;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ServerVacuumEvents implements OnServerEventListener {
     private VacuumStatus state = new VacuumStatus(null);
     private VacuumConsumableStatus consumables = new VacuumConsumableStatus(null);
+    private ZoneId timezone = ZoneId.systemDefault();
+    private Map<String, VacuumTimer> timers = new LinkedHashMap<>();
 
     public ServerVacuumEvents() {
     }
@@ -27,6 +35,10 @@ public class ServerVacuumEvents implements OnServerEventListener {
         switch (method){
             case "get_status":
                 return status();
+            case "get_timezone":
+                return getTimezone();
+            case "set_timezone":
+                return setTimezone(paramsArray);
             case "get_consumable":
                 return consumableStatus();
             case "reset_consumable":
@@ -47,6 +59,14 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return spotCleaning();
             case "find_me":
                 return findMe();
+            case "get_timer":
+                return getTimers();
+            case "set_timer":
+                return addTimer(paramsArray);
+            case "upd_timer":
+                return setTimerEnabled(paramsArray);
+            case "del_timer":
+                return removeTimer(paramsArray);
             default:
                 return null;
         }
@@ -56,6 +76,20 @@ public class ServerVacuumEvents implements OnServerEventListener {
         JSONArray ret = new JSONArray();
         ret.put(state.construct());
         return ret;
+    }
+
+    private Object getTimezone(){
+        JSONArray ret = new JSONArray();
+        ret.put(timezone.getId());
+        return ret;
+    }
+
+    private Object setTimezone(JSONArray tz){
+        if(tz == null) return null;
+        String zone = tz.optString(0, null);
+        if (zone == null)  return null;
+        this.timezone = ZoneId.of(zone);
+        return ok();
     }
 
     private Object consumableStatus(){
@@ -114,9 +148,50 @@ public class ServerVacuumEvents implements OnServerEventListener {
         return ok();
     }
 
+    private Object getTimers(){
+        JSONArray resp = new JSONArray();
+        for (VacuumTimer t : timers.values()) {
+            resp.put(t.construct(true));
+        }
+        return resp;
+    }
+
+    private Object addTimer(JSONArray timer) {
+        if (timer == null) return null;
+        JSONArray t = timer.optJSONArray(0);
+        if (t == null) return null;
+        try {
+            VacuumTimer tm = new VacuumTimer(t);
+            JSONArray job = new JSONArray();
+            job.put("start_clean");
+            job.put(-1);
+            tm.setJob(job);
+            timers.put(tm.getID(), tm);
+        } catch (CommandExecutionException e) {
+            return null;
+        }
+        return ok();
+    }
+
+    private Object setTimerEnabled(JSONArray timer){
+        if (timer == null) return null;
+        VacuumTimer t = timers.get(timer.optString(0));
+        if (t == null) return null;
+        t.setEnabled(timer.optString(1).equals("on"));
+        return ok();
+    }
+
+    private Object removeTimer(JSONArray timer){
+        if (timer == null) return null;
+        VacuumTimer t = timers.remove(timer.optString(0));
+        if (t == null) return null;
+        return ok();
+    }
+
     private JSONArray ok(){
         JSONArray ret = new JSONArray();
         ret.put("ok");
         return ret;
     }
+
 }

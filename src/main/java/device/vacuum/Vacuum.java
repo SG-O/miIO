@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.InetAddress;
+import java.time.ZoneId;
 
 public class Vacuum extends Device {
 
@@ -31,6 +32,19 @@ public class Vacuum extends Device {
         JSONObject stat = resp.optJSONObject(0);
         if (stat == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return new VacuumStatus(stat);
+    }
+
+    public ZoneId getTimezone() throws CommandExecutionException {
+        JSONArray resp = sendToArray("get_timezone");
+        String zone = resp.optString(0, null);
+        if (zone == null ) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        return ZoneId.of(zone);
+    }
+
+    public boolean setTimezone(ZoneId zone) throws CommandExecutionException {
+        JSONArray tz = new JSONArray();
+        tz.put(zone.getId());
+        return sendOk("set_timezone", tz);
     }
 
     /**
@@ -133,5 +147,39 @@ public class Vacuum extends Device {
         JSONArray params = new JSONArray();
         params.put(speed);
         return sendOk("set_custom_mode", params);
+    }
+
+    public VacuumTimer[] getTimers() throws CommandExecutionException {
+        JSONArray tm = sendToArray("get_timer");
+        if (tm == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        VacuumTimer[] timers = new VacuumTimer[tm.length()];
+        for (int i = 0; i < tm.length(); i++){
+            timers[i] = new VacuumTimer(tm.optJSONArray(i));
+        }
+        return timers;
+    }
+
+    public boolean addTimer(VacuumTimer timer) throws CommandExecutionException {
+        if (timer == null) return false;
+        JSONArray tm = timer.construct();
+        if (tm == null) return false;
+        JSONArray payload = new JSONArray();
+        payload.put(tm);
+        return sendOk("set_timer", payload);
+    }
+
+    public boolean setTimerEnabled(VacuumTimer timer) throws CommandExecutionException {
+        if (timer == null) return false;
+        JSONArray payload = new JSONArray();
+        payload.put(timer.getID());
+        payload.put(timer.getOnOff());
+        return sendOk("upd_timer", payload);
+    }
+
+    public boolean removeTimer(VacuumTimer timer) throws CommandExecutionException {
+        if (timer == null) return false;
+        JSONArray payload = new JSONArray();
+        payload.put(timer.getID());
+        return sendOk("del_timer", payload);
     }
 }
