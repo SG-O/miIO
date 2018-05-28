@@ -52,12 +52,9 @@ public class VacuumTimerTest {
         assertEquals(t2.getTime(), t6.getTime());
         assertNull(t2.getJob());
 
-        assertEquals("[\"1234\",\"on\",[\"0 10 * * 1,4\",[\"\",\"\"]]]", t0.construct(true).toString());
-        assertEquals("[\"2345\",[\"30 12 * * 1,4\",[\"\",\"\"]]]", t2.construct(false).toString());
         Set<DayOfWeek> dSingle =  new HashSet<>();
         dSingle.add(DayOfWeek.SUNDAY);
         VacuumTimer t7 = new VacuumTimer("1234", true, tm, dSingle, empty);
-        assertEquals("[\"1234\",\"on\",[\"0 10 * * 0\",[\"\",\"\"]]]", t7.construct(true).toString());
         VacuumTimer t8 = new VacuumTimer(t7.construct(true));
         assertEquals(t7, t8);
         assertEquals(t7.getRunDays(), t8.getRunDays());
@@ -177,7 +174,11 @@ public class VacuumTimerTest {
 
     @Test
     public void toStringTest() {
-        assertEquals("VacuumTimer{ID='1234', enabled=true, time=10:00, runDays=[MONDAY, THURSDAY], job=[\"\",\"\"]}", t0.toString());
-        assertEquals("VacuumTimer{ID='2345', enabled=true, time=12:30, runDays=[MONDAY, THURSDAY], job=null}", t2.toString());
+        Set<DayOfWeek> dSingle =  new HashSet<>();
+        dSingle.add(DayOfWeek.SUNDAY);
+        VacuumTimer t5 = new VacuumTimer("1234", true, tm, dSingle, empty);
+        VacuumTimer t6 = new VacuumTimer("1234", true, tm, null, empty);
+        assertEquals("VacuumTimer{ID='1234', enabled=true, time=10:00, runDays=[SUNDAY], job=[\"\",\"\"]}", t5.toString());
+        assertEquals("VacuumTimer{ID='1234', enabled=true, time=10:00, runDays=[], job=[\"\",\"\"]}", t6.toString());
     }
 }
