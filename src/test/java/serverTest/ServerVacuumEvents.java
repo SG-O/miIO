@@ -75,6 +75,10 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return setDoNotDisturb(paramsArray);
             case "close_dnd_timer":
                 return disableDoNotDisturb();
+            case "app_goto_target":
+                return goTo(paramsArray);
+            case "app_zoned_clean":
+                return cleanArea(paramsArray);
             default:
                 return null;
         }
@@ -210,6 +214,18 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Object disableDoNotDisturb(){
         dnd.setEnabled(false);
         state.setDndEnabled(false);
+        return ok();
+    }
+
+    public Object goTo(JSONArray p) {
+        if (p == null) return null;
+        state.setState(VacuumStatus.State.IDLE);
+        return ok();
+    }
+
+    public Object cleanArea(JSONArray values) {
+        if (values == null) return null;
+        state.setState(VacuumStatus.State.CLEANING_ZONE);
         return ok();
     }
 

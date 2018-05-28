@@ -6,6 +6,7 @@ import base.Token;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.awt.*;
 import java.net.InetAddress;
 import java.time.ZoneId;
 
@@ -193,5 +194,24 @@ public class Vacuum extends Device {
 
     public boolean disableDoNotDisturb() throws CommandExecutionException {
         return sendOk("close_dnd_timer");
+    }
+
+    public JSONArray goTo(Point p) throws CommandExecutionException {
+        if (p == null) return null;
+        JSONArray payload = new JSONArray();
+        payload.put(p.x);
+        payload.put(p.y);
+        return sendToArray("app_goto_target" , payload);
+    }
+
+    public JSONArray cleanArea(Point bottomLeft, Point topRight, int passes) throws CommandExecutionException {
+        if (bottomLeft == null || topRight == null || passes < 1) return null;
+        JSONArray payload = new JSONArray();
+        payload.put(bottomLeft.x);
+        payload.put(bottomLeft.y);
+        payload.put(topRight.x);
+        payload.put(topRight.y);
+        payload.put(passes);
+        return sendToArray("app_zoned_clean" , payload);
     }
 }
