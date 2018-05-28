@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@SuppressWarnings("WeakerAccess")
 public class VacuumTimer {
     private String ID;
     private boolean enabled;
@@ -17,7 +18,7 @@ public class VacuumTimer {
     private JSONArray job;
 
     public VacuumTimer(String ID, boolean enabled, LocalTime time, Set<DayOfWeek> runDays, JSONArray job) {
-        if (ID == null) ID = Long.valueOf(System.currentTimeMillis() / 1000).toString();
+        if (ID == null) ID = Long.valueOf(System.currentTimeMillis()).toString();
         this.ID = ID;
         this.enabled = enabled;
         this.time = time;
@@ -27,7 +28,7 @@ public class VacuumTimer {
     }
 
     public VacuumTimer(String ID, boolean enabled, int hour, int minute, Set<DayOfWeek> runDays) {
-        if (ID == null) ID = Long.valueOf(System.currentTimeMillis() / 1000).toString();
+        if (ID == null) ID = Long.valueOf(System.currentTimeMillis()).toString();
         this.ID = ID;
         this.enabled = enabled;
         if (hour > 23) hour = 23;
@@ -43,7 +44,7 @@ public class VacuumTimer {
         if (timer == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         int length = timer.length();
         this.runDays = new HashSet<>();
-        this.ID = timer.optString(0, Long.valueOf(System.currentTimeMillis() / 1000).toString());
+        this.ID = timer.optString(0, Long.valueOf(System.currentTimeMillis()).toString());
         JSONArray jobArray;
         if (length > 2) {
             this.enabled = timer.optString(1).equals("on");
@@ -127,7 +128,7 @@ public class VacuumTimer {
         }
         JSONArray timer = new JSONArray();
         timer.put(ID);
-        if (server) timer.put(enabled ? "on" : "off");
+        if (server) timer.put(getOnOff());
         timer.put(jobArray);
         return timer;
     }
@@ -138,6 +139,10 @@ public class VacuumTimer {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public String getOnOff(){
+        return enabled ? "on" : "off";
     }
 
     public void setEnabled(boolean enabled) {
@@ -154,6 +159,10 @@ public class VacuumTimer {
 
     public JSONArray getJob() {
         return job;
+    }
+
+    public void setJob(JSONArray job) {
+        this.job = job;
     }
 
     @Override

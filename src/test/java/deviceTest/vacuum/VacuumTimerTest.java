@@ -151,6 +151,14 @@ public class VacuumTimerTest {
         assertNull(t2.getJob());
         assertNull(t3.getJob());
         assertNull(t4.getJob());
+
+        JSONArray job = new JSONArray();
+        job.put("start_clean");
+        job.put(-1);
+
+        t0.setJob(job);
+
+        assertEquals(job, t0.getJob());
     }
 
     @SuppressWarnings({"SimplifiableJUnitAssertion", "ConstantConditions", "ObjectEqualsNull"})
