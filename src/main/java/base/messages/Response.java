@@ -51,21 +51,15 @@ public class Response extends Message{
         if (params != null) {
             if (params.getClass() == JSONObject.class) {
                 JSONObject paramsObj = (JSONObject) params;
-                if (paramsObj.length() > 0) {
-                    out.put("result", paramsObj);
-                }
+                out.put("result", paramsObj);
             }
             if (params.getClass() == JSONArray.class) {
                 JSONArray paramsObj = (JSONArray) params;
-                if (paramsObj.length() > 0) {
                     out.put("result", paramsObj);
-                }
             }
             if (params.getClass() == String.class) {
                 String paramsObj = (String) params;
-                if (paramsObj.length() > 0) {
-                    out.put("result", paramsObj);
-                }
+                out.put("result", paramsObj);
             }
         }
         return out.toString();
