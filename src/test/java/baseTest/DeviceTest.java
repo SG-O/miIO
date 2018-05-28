@@ -3,10 +3,7 @@ package baseTest;
 import base.CommandExecutionException;
 import base.Device;
 import base.Token;
-import device.vacuum.Vacuum;
-import device.vacuum.VacuumConsumableStatus;
-import device.vacuum.VacuumStatus;
-import device.vacuum.VacuumTimer;
+import device.vacuum.*;
 import org.json.JSONObject;
 import org.junit.Test;
 import server.Server;
@@ -14,6 +11,7 @@ import serverTest.ServerGenericEvents;
 import serverTest.ServerVacuumEvents;
 
 import java.net.InetAddress;
+import java.time.LocalTime;
 import java.time.ZoneId;
 
 import static base.CommandExecutionException.Error.DEVICE_NOT_FOUND;
@@ -136,6 +134,17 @@ public class DeviceTest {
         assertFalse(d1.getTimers()[0].isEnabled());
         assertTrue(d1.removeTimer(t0));
         assertEquals(0, d1.getTimers().length);
+
+        assertEquals(new VacuumDoNotDisturb(null, null), d1.getDoNotDisturb());
+        LocalTime start = LocalTime.of(12, 30);
+        LocalTime end = LocalTime.of(15, 30);
+        assertTrue(d1.setDoNotDisturb(new VacuumDoNotDisturb(start, end)));
+        assertEquals(new VacuumDoNotDisturb(start, end), d1.getDoNotDisturb());
+        assertTrue(d1.getDoNotDisturb().isEnabled());
+        assertTrue(d1.disableDoNotDisturb());
+        assertFalse(d1.getDoNotDisturb().isEnabled());
+        assertTrue(d1.setDoNotDisturb(new VacuumDoNotDisturb(null, null)));
+        assertEquals(new VacuumDoNotDisturb(null, null), d1.getDoNotDisturb());
 
         ts1.terminate();
     }

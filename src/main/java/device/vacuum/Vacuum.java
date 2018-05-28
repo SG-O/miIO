@@ -182,4 +182,16 @@ public class Vacuum extends Device {
         payload.put(timer.getID());
         return sendOk("del_timer", payload);
     }
+
+    public VacuumDoNotDisturb getDoNotDisturb() throws CommandExecutionException {
+        return new VacuumDoNotDisturb(sendToArray("get_dnd_timer"));
+    }
+
+    public boolean setDoNotDisturb(VacuumDoNotDisturb dnd) throws CommandExecutionException {
+        return sendOk("set_dnd_timer", dnd.construct());
+    }
+
+    public boolean disableDoNotDisturb() throws CommandExecutionException {
+        return sendOk("close_dnd_timer");
+    }
 }

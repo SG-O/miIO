@@ -2,6 +2,7 @@ package serverTest;
 
 import base.CommandExecutionException;
 import device.vacuum.VacuumConsumableStatus;
+import device.vacuum.VacuumDoNotDisturb;
 import device.vacuum.VacuumStatus;
 import device.vacuum.VacuumTimer;
 import org.json.JSONArray;
@@ -16,6 +17,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private VacuumConsumableStatus consumables = new VacuumConsumableStatus(null);
     private ZoneId timezone = ZoneId.systemDefault();
     private Map<String, VacuumTimer> timers = new LinkedHashMap<>();
+    private VacuumDoNotDisturb dnd = new VacuumDoNotDisturb(null, null);
 
     public ServerVacuumEvents() {
     }
@@ -67,6 +69,12 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return setTimerEnabled(paramsArray);
             case "del_timer":
                 return removeTimer(paramsArray);
+            case "get_dnd_timer":
+                return getDoNotDisturb();
+            case "set_dnd_timer":
+                return setDoNotDisturb(paramsArray);
+            case "close_dnd_timer":
+                return disableDoNotDisturb();
             default:
                 return null;
         }
@@ -185,6 +193,23 @@ public class ServerVacuumEvents implements OnServerEventListener {
         if (timer == null) return null;
         VacuumTimer t = timers.remove(timer.optString(0));
         if (t == null) return null;
+        return ok();
+    }
+
+    private Object getDoNotDisturb(){
+        return dnd.construct(true);
+    }
+
+    private Object setDoNotDisturb(JSONArray doNotDisturb){
+        if (doNotDisturb == null) return null;
+        dnd = new VacuumDoNotDisturb(doNotDisturb);
+        state.setDndEnabled(true);
+        return ok();
+    }
+
+    private Object disableDoNotDisturb(){
+        dnd.setEnabled(false);
+        state.setDndEnabled(false);
         return ok();
     }
 
