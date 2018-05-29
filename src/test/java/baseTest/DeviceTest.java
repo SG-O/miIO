@@ -158,6 +158,12 @@ public class DeviceTest {
         assertFalse(d1.cleanArea(new Point(), new Point(), 0));
         assertTrue(d1.cleanArea(0.0f, 0.0f, 1.0f, 1.0f, 1));
         assertTrue(d1.cleanAreafromMap(0,0,1,1,1));
+
+        assertEquals(100000, d1.getTotalCleanedArea());
+        assertEquals(750, d1.getTotalCleaningTime());
+        assertEquals(5, d1.getTotalCleans());
+        assertEquals(5, d1.getAllCleanups().length);
+        assertTrue(d1.getAllCleanups()[0].isCompleted());
         ts1.terminate();
     }
 

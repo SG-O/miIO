@@ -1,13 +1,11 @@
 package serverTest;
 
 import base.CommandExecutionException;
-import device.vacuum.VacuumConsumableStatus;
-import device.vacuum.VacuumDoNotDisturb;
-import device.vacuum.VacuumStatus;
-import device.vacuum.VacuumTimer;
+import device.vacuum.*;
 import org.json.JSONArray;
 import server.OnServerEventListener;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,6 +16,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private ZoneId timezone = ZoneId.systemDefault();
     private Map<String, VacuumTimer> timers = new LinkedHashMap<>();
     private VacuumDoNotDisturb dnd = new VacuumDoNotDisturb(null, null);
+    private Map<Long, VacuumCleanup> cleanups = new LinkedHashMap<>();
 
     public ServerVacuumEvents() {
     }
@@ -79,6 +78,10 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return goTo(paramsArray);
             case "app_zoned_clean":
                 return cleanArea(paramsArray);
+            case "get_clean_summary":
+                return getCleaningSummary();
+            case "get_clean_record":
+                return getCleanup(paramsArray);
             default:
                 return null;
         }
@@ -133,6 +136,8 @@ public class ServerVacuumEvents implements OnServerEventListener {
 
     private Object start()  {
         state.setState(VacuumStatus.State.CLEANING);
+        Instant start = Instant.now();
+        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plusSeconds(200), 200, 30000, true));
         return ok();
     }
 
@@ -153,6 +158,8 @@ public class ServerVacuumEvents implements OnServerEventListener {
 
     private Object spotCleaning() {
         state.setState(VacuumStatus.State.SPOT_CLEANUP);
+        Instant start = Instant.now();
+        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plusSeconds(100), 100, 10000, true));
         return ok();
     }
 
@@ -217,16 +224,46 @@ public class ServerVacuumEvents implements OnServerEventListener {
         return ok();
     }
 
-    public Object goTo(JSONArray p) {
+    private Object goTo(JSONArray p) {
         if (p == null) return null;
         state.setState(VacuumStatus.State.IDLE);
         return ok();
     }
 
-    public Object cleanArea(JSONArray values) {
+    private Object cleanArea(JSONArray values) {
         if (values == null) return null;
+        Instant start = Instant.now();
+        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plusSeconds(150), 150, 20000, true));
         state.setState(VacuumStatus.State.CLEANING_ZONE);
         return ok();
+    }
+
+    private Object getCleaningSummary(){
+        JSONArray cleans = new JSONArray();
+        for (Long id : cleanups.keySet()){
+            cleans.put(id.longValue());
+        }
+        long runtime = 0;
+        long area = 0;
+        for (VacuumCleanup c : cleanups.values()){
+            runtime += c.getRuntime();
+            area += c.getArea();
+        }
+        JSONArray ret = new JSONArray();
+        ret.put(runtime);
+        ret.put(area);
+        ret.put(cleanups.size());
+        ret.put(cleans);
+        return ret;
+    }
+
+    private Object getCleanup(JSONArray id){
+        if (id == null) return null;
+        VacuumCleanup c = cleanups.get(id.optLong(0, -1));
+        if (c == null) return null;
+        JSONArray ret = new JSONArray();
+        ret.put(c.construct());
+        return ret;
     }
 
     private JSONArray ok(){

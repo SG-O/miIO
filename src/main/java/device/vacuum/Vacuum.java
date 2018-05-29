@@ -299,4 +299,33 @@ public class Vacuum extends Device {
         wrapper.put(payload);
         return sendOk("app_zoned_clean" , wrapper);
     }
+
+    private JSONArray getCleaningSummary() throws CommandExecutionException {
+        return sendToArray("get_clean_summary");
+    }
+
+    public long getTotalCleaningTime() throws CommandExecutionException {
+        return getCleaningSummary().optLong(0);
+    }
+
+    public long getTotalCleanedArea() throws CommandExecutionException {
+        return getCleaningSummary().optLong(1);
+    }
+
+    public long getTotalCleans() throws CommandExecutionException {
+        return getCleaningSummary().optLong(2);
+    }
+
+    public VacuumCleanup[] getAllCleanups() throws CommandExecutionException {
+        JSONArray cleanupIDs = getCleaningSummary().optJSONArray(3);
+        if (cleanupIDs == null) return null;
+        VacuumCleanup[] res = new VacuumCleanup[cleanupIDs.length()];
+        for (int i = 0; i < cleanupIDs.length(); i++){
+            JSONArray send = new JSONArray();
+            send.put(cleanupIDs.optLong(i));
+            JSONArray ar = sendToArray("get_clean_record", send).optJSONArray(0);
+            res[i] = new VacuumCleanup(ar);
+        }
+        return res;
+    }
 }
