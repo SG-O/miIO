@@ -17,6 +17,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Map<String, VacuumTimer> timers = new LinkedHashMap<>();
     private VacuumDoNotDisturb dnd = new VacuumDoNotDisturb(null, null);
     private Map<Long, VacuumCleanup> cleanups = new LinkedHashMap<>();
+    private int soundVolume = 90;
 
     public ServerVacuumEvents() {
     }
@@ -82,6 +83,12 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return getCleaningSummary();
             case "get_clean_record":
                 return getCleanup(paramsArray);
+            case "get_sound_volume":
+                return getSoundVolume();
+            case "change_sound_volume":
+                return setSoundVolume(paramsArray);
+            case "test_sound_volume":
+                return testSoundVolume();
             default:
                 return null;
         }
@@ -264,6 +271,24 @@ public class ServerVacuumEvents implements OnServerEventListener {
         JSONArray ret = new JSONArray();
         ret.put(c.construct());
         return ret;
+    }
+
+    private Object getSoundVolume(){
+        JSONArray ret = new JSONArray();
+        ret.put(soundVolume);
+        return ret;
+    }
+
+    private Object setSoundVolume(JSONArray vol){
+        if (vol == null) return null;
+        int volVal = vol.optInt(0, -1);
+        if (volVal > 100 | volVal < 0) return null;
+        this.soundVolume = volVal;
+        return ok();
+    }
+
+    private Object testSoundVolume(){
+        return ok();
     }
 
     private JSONArray ok(){

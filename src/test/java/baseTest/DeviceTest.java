@@ -164,6 +164,18 @@ public class DeviceTest {
         assertEquals(5, d1.getTotalCleans());
         assertEquals(5, d1.getAllCleanups().length);
         assertTrue(d1.getAllCleanups()[0].isCompleted());
+
+        assertEquals(90, d1.getSoundVolume());
+        assertTrue(d1.setSoundVolume(50));
+        assertEquals(50, d1.getSoundVolume());
+        assertTrue(d1.setSoundVolume(-5));
+        assertEquals(0, d1.getSoundVolume());
+        assertTrue(d1.setSoundVolume(200));
+        assertEquals(100, d1.getSoundVolume());
+        assertTrue(d1.setSoundVolume(90));
+        assertEquals(90, d1.getSoundVolume());
+        assertTrue(d1.testSoundVolume());
+
         ts1.terminate();
     }
 

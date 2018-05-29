@@ -328,4 +328,24 @@ public class Vacuum extends Device {
         }
         return res;
     }
+
+    public int getSoundVolume() throws CommandExecutionException {
+        JSONArray res = sendToArray("get_sound_volume");
+        if (res == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        int vol = res.optInt(0, -1);
+        if (vol < 0) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        return vol;
+    }
+
+    public boolean setSoundVolume(int volume) throws CommandExecutionException {
+        if (volume < 0) volume = 0;
+        if (volume > 100) volume = 100;
+        JSONArray payload = new JSONArray();
+        payload.put(volume);
+        return sendOk("change_sound_volume", payload);
+    }
+
+    public boolean testSoundVolume() throws CommandExecutionException {
+        return sendOk("test_sound_volume");
+    }
 }
