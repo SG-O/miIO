@@ -389,4 +389,21 @@ public class Vacuum extends Device {
         send.put(payload);
         return sendOk("app_rc_move", send);
     }
+
+    public VacuumSounpackInstallState installSoundpack(String url, String md5, int soundId) throws CommandExecutionException {
+        if (url == null || md5 == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+        JSONObject install = new JSONObject();
+        install.put("url", url);
+        install.put("md5", md5);
+        install.put("sid", soundId);
+        JSONArray ret = sendToArray("dnld_install_sound", install);
+        if (ret == null) return null;
+        return new VacuumSounpackInstallState(ret.optJSONObject(0));
+    }
+
+    public VacuumSounpackInstallState soundpackInstallStatus() throws CommandExecutionException {
+        JSONArray ret = sendToArray("get_sound_progress");
+        if (ret == null) return null;
+        return new VacuumSounpackInstallState(ret.optJSONObject(0));
+    }
 }

@@ -16,6 +16,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 
 import static base.CommandExecutionException.Error.DEVICE_NOT_FOUND;
+import static base.CommandExecutionException.Error.INVALID_PARAMETERS;
 import static base.CommandExecutionException.Error.UNKNOWN_METHOD;
 import static org.junit.Assert.*;
 
@@ -191,18 +192,37 @@ public class DeviceTest {
         assertTrue(d1.manualControlStop());
         assertEquals(VacuumStatus.State.IDLE, d1.status().getState());
 
+        assertEquals(0, d1.soundpackInstallStatus().getProgress());
+        assertEquals(0, d1.soundpackInstallStatus().getSid());
+        assertEquals(-1, d1.installSoundpack("127.0.0.1", "6cd9eb1aee36e091974f259ea81621fa", 5).getSid());
+        assertEquals(100, d1.soundpackInstallStatus().getProgress());
+        assertEquals(5, d1.soundpackInstallStatus().getSid());
+
         ts1.terminate();
     }
 
     @Test
     public void failTest() throws Exception {
         Token tk = new Token("00112233445566778899AABBCCDDEEFF", 16);
-        Device d0 = new Device(InetAddress.getByName("127.0.0.1"), tk, null, 100, 1);
+        Vacuum d0 = new Vacuum(InetAddress.getByName("127.0.0.1"), tk, 100, 1);
         try {
             d0.update("127.0.0.5", "6cd9eb1aee36e091974f259ea81621fa");
+            fail();
         } catch (CommandExecutionException e){
             assertEquals(DEVICE_NOT_FOUND.cause, e.getError().cause);
             assertEquals("DEVICE_NOT_FOUND", e.toString());
+        }
+        try {
+            d0.installSoundpack(null, "6cd9eb1aee36e091974f259ea81621fa", 5);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.installSoundpack("127.0.0.5", null, 5);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
         }
         assertFalse(d0.discover());
     }

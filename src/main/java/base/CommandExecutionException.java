@@ -9,7 +9,8 @@ public class CommandExecutionException extends Exception {
         DEVICE_NOT_FOUND(2),
         EMPTY_RESPONSE(3),
         INVALID_RESPONSE(4),
-        IP_OR_TOKEN_UNKNOWN(5);
+        IP_OR_TOKEN_UNKNOWN(5),
+        INVALID_PARAMETERS(6);
         public final int cause;
 
         Error(int cause) {

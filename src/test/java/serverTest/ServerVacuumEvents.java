@@ -19,6 +19,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private VacuumDoNotDisturb dnd = new VacuumDoNotDisturb(null, null);
     private Map<Long, VacuumCleanup> cleanups = new LinkedHashMap<>();
     private int soundVolume = 90;
+    private VacuumSounpackInstallState soundSetupState = new VacuumSounpackInstallState(0, VacuumSounpackInstallState.State.UNKNOWN, VacuumSounpackInstallState.Error.NONE, 0);
 
     public ServerVacuumEvents() {
     }
@@ -30,9 +31,14 @@ public class ServerVacuumEvents implements OnServerEventListener {
     @Override
     public Object onCommandListener(String method, Object params) {
         JSONArray paramsArray = null;
+        JSONObject paramsObject = null;
         if (params != null){
             if (params.getClass() == JSONArray.class){
                 paramsArray = (JSONArray) params;
+            }
+            if (params.getClass() == JSONObject.class){
+                //noinspection ConstantConditions
+                paramsObject = (JSONObject) params;
             }
         }
         switch (method){
@@ -96,6 +102,10 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return manualControlStop();
             case "app_rc_move":
                 return manualControlMove(paramsArray);
+            case "dnld_install_sound":
+                return installSoundpack(paramsObject);
+            case "get_sound_progress":
+                return soundpackInstallStatus();
             default:
                 return null;
         }
@@ -313,6 +323,23 @@ public class ServerVacuumEvents implements OnServerEventListener {
         JSONObject ob = mov.optJSONObject(0);
         if (ob == null) return null;
         return ok();
+    }
+
+    private Object installSoundpack(JSONObject install) {
+        if (install == null) return null;
+        soundSetupState.setSid(install.optInt("sid", -1));
+        soundSetupState.setError(VacuumSounpackInstallState.Error.NONE);
+        soundSetupState.setState(VacuumSounpackInstallState.State.UNKNOWN);
+        soundSetupState.setProgress(100);
+        JSONArray ret = new JSONArray();
+        ret.put(soundSetupState.construct(false));
+        return ret;
+    }
+
+    private Object soundpackInstallStatus() {
+        JSONArray ret = new JSONArray();
+        ret.put(soundSetupState.construct(true));
+        return ret;
     }
 
     private JSONArray ok(){
