@@ -1,6 +1,8 @@
 package base;
 
 public class CommandExecutionException extends Exception {
+    private static final long serialVersionUID = -3409332042121819756L;
+
     public enum Error {
         TIMEOUT(0),
         UNKNOWN_METHOD(1),
