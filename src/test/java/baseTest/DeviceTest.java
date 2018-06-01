@@ -51,7 +51,7 @@ public class DeviceTest {
         Token tk = new Token("00112233445566778899AABBCCDDEEFF", 16);
         Server ts1 = new Server(tk,ts0.getDeviceId() * 2,"rockrobo.vacuum.v1", "3.3.9_003194", ts0.getHardware(),ts0.getNetwork(), ts0.getMacAddress(), ts0.getLifeTime() * 2, ts0.getAccessPoint());
         ts1.start();
-        Vacuum d1 = new Vacuum(InetAddress.getByName("127.0.0.1"), tk, 1000000, 2);
+        Vacuum d1 = new Vacuum(InetAddress.getByName("127.0.0.1"), tk, 0, 2);
         assertEquals(ts1.getMacAddress(), d1.info().optString("mac"));
         assertEquals(ts1.getModel(), d1.model());
         assertEquals(ts1.getFirmware(), d1.firmware());
