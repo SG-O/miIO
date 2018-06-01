@@ -198,6 +198,12 @@ public class DeviceTest {
         assertEquals(100, d1.soundpackInstallStatus().getProgress());
         assertEquals(5, d1.soundpackInstallStatus().getSid());
 
+        assertEquals("{\"current_high\":500,\"stall_time\":10,\"current_low\":400,\"enable\":0,\"current_integral\":450}", d1.getCarpetModeState().toString());
+        assertTrue(d1.setCarpetMode(true, 500, 400, 450, 10));
+        assertEquals("{\"current_high\":500,\"stall_time\":10,\"current_low\":400,\"enable\":1,\"current_integral\":450}", d1.getCarpetModeState().toString());
+
+        assertEquals("{\"serial_number\":\"0000000000001\"}", d1.getSerialnumber().toString());
+
         ts1.terminate();
     }
 

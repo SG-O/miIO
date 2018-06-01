@@ -20,6 +20,8 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Map<Long, VacuumCleanup> cleanups = new LinkedHashMap<>();
     private int soundVolume = 90;
     private VacuumSounpackInstallState soundSetupState = new VacuumSounpackInstallState(0, VacuumSounpackInstallState.State.UNKNOWN, VacuumSounpackInstallState.Error.NONE, 0);
+    private JSONObject carpedMode = new JSONObject("{\"current_high\":500,\"stall_time\":10,\"current_low\":400,\"enable\":0,\"current_integral\":450}");
+    private JSONObject serialNumber = new JSONObject("{\"serial_number\":\"0000000000001\"}");
 
     public ServerVacuumEvents() {
     }
@@ -106,6 +108,12 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return installSoundpack(paramsObject);
             case "get_sound_progress":
                 return soundpackInstallStatus();
+            case "get_carpet_mode":
+                return getCarpetModeState();
+            case "set_carpet_mode":
+                return setCarpetMode(paramsArray);
+            case "get_serial_number":
+                return getSerialnumber();
             default:
                 return null;
         }
@@ -339,6 +347,26 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Object soundpackInstallStatus() {
         JSONArray ret = new JSONArray();
         ret.put(soundSetupState.construct(true));
+        return ret;
+    }
+
+    private Object getCarpetModeState(){
+        JSONArray ret = new JSONArray();
+        ret.put(carpedMode);
+        return ret;
+    }
+
+    private Object setCarpetMode(JSONArray mode) {
+        if (mode == null) return null;
+        JSONObject cMode = mode.optJSONObject(0);
+        if (cMode == null) return null;
+        this.carpedMode = cMode;
+        return ok();
+    }
+
+    private Object getSerialnumber() {
+        JSONArray ret = new JSONArray();
+        ret.put(serialNumber);
         return ret;
     }
 

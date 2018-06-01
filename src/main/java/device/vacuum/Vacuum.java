@@ -406,4 +406,28 @@ public class Vacuum extends Device {
         if (ret == null) return null;
         return new VacuumSounpackInstallState(ret.optJSONObject(0));
     }
+
+    public JSONObject getCarpetModeState() throws CommandExecutionException {
+        JSONArray ret = sendToArray("get_carpet_mode");
+        if (ret == null) return null;
+        return ret.optJSONObject(0);
+    }
+
+    public boolean setCarpetMode(boolean enabled, int high, int low, int integral, int stallTime) throws CommandExecutionException {
+        JSONObject payload = new JSONObject();
+        payload.put("enable", enabled ? 1:0);
+        payload.put("current_high", high);
+        payload.put("current_low", low);
+        payload.put("current_integral", integral);
+        payload.put("stall_time", stallTime);
+        JSONArray send = new JSONArray();
+        send.put(payload);
+        return sendOk("set_carpet_mode", send);
+    }
+
+    public JSONObject getSerialnumber() throws CommandExecutionException {
+        JSONArray ret = sendToArray("get_serial_number");
+        if (ret == null) return null;
+        return ret.optJSONObject(0);
+    }
 }
