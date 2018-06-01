@@ -157,12 +157,13 @@ public class DeviceTest {
         assertFalse(d1.cleanArea(new Point(), null, 1));
         assertFalse(d1.cleanArea(new Point(), new Point(), 0));
         assertTrue(d1.cleanArea(0.0f, 0.0f, 1.0f, 1.0f, 1));
-        assertTrue(d1.cleanAreafromMap(0,0,1,1,1));
+        assertTrue(d1.cleanAreaFromMap(0,0,1,1,1));
+        assertTrue(d1.cleanAreaFromMap(1,1,0,0,1));
 
-        assertEquals(100000, d1.getTotalCleanedArea());
-        assertEquals(750, d1.getTotalCleaningTime());
-        assertEquals(5, d1.getTotalCleans());
-        assertEquals(5, d1.getAllCleanups().length);
+        assertEquals(120000, d1.getTotalCleanedArea());
+        assertEquals(900, d1.getTotalCleaningTime());
+        assertEquals(6, d1.getTotalCleans());
+        assertEquals(6, d1.getAllCleanups().length);
         assertTrue(d1.getAllCleanups()[0].isCompleted());
 
         assertEquals(90, d1.getSoundVolume());
@@ -175,6 +176,20 @@ public class DeviceTest {
         assertTrue(d1.setSoundVolume(90));
         assertEquals(90, d1.getSoundVolume());
         assertTrue(d1.testSoundVolume());
+
+        assertTrue(d1.manualControlStart());
+        assertEquals(VacuumStatus.State.REMOTE_CONTROL, d1.status().getState());
+        assertTrue(d1.manualControlMove(0.0f, 0.2f, -1));
+        assertTrue(d1.manualControlStop());
+        assertEquals(VacuumStatus.State.IDLE, d1.status().getState());
+        assertTrue(d1.manualControlMove(300.0f, 0.4f, 500));
+        assertEquals(VacuumStatus.State.REMOTE_CONTROL, d1.status().getState());
+        assertTrue(d1.manualControlStop());
+        assertEquals(VacuumStatus.State.IDLE, d1.status().getState());
+        assertTrue(d1.manualControlMove(-300.0f, -0.4f, 500));
+        assertEquals(VacuumStatus.State.REMOTE_CONTROL, d1.status().getState());
+        assertTrue(d1.manualControlStop());
+        assertEquals(VacuumStatus.State.IDLE, d1.status().getState());
 
         ts1.terminate();
     }

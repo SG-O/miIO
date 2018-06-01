@@ -3,6 +3,7 @@ package serverTest;
 import base.CommandExecutionException;
 import device.vacuum.*;
 import org.json.JSONArray;
+import org.json.JSONObject;
 import server.OnServerEventListener;
 
 import java.time.Instant;
@@ -89,6 +90,12 @@ public class ServerVacuumEvents implements OnServerEventListener {
                 return setSoundVolume(paramsArray);
             case "test_sound_volume":
                 return testSoundVolume();
+            case "app_rc_start":
+                return manualControlStart();
+            case "app_rc_end":
+                return manualControlStop();
+            case "app_rc_move":
+                return manualControlMove(paramsArray);
             default:
                 return null;
         }
@@ -288,6 +295,23 @@ public class ServerVacuumEvents implements OnServerEventListener {
     }
 
     private Object testSoundVolume(){
+        return ok();
+    }
+
+    private Object manualControlStart() {
+        state.setState(VacuumStatus.State.REMOTE_CONTROL);
+        return ok();
+    }
+
+    private Object manualControlStop() {
+        state.setState(VacuumStatus.State.IDLE);
+        return ok();
+    }
+
+    private Object manualControlMove(JSONArray mov) {
+        if (mov == null) return null;
+        JSONObject ob = mov.optJSONObject(0);
+        if (ob == null) return null;
         return ok();
     }
 

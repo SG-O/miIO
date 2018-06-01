@@ -11,6 +11,7 @@ import java.net.InetAddress;
 import java.time.ZoneId;
 
 public class Vacuum extends Device {
+    private  int manualControlSequence = -1;
 
     /**
      * Create an object for communicating with the Mi Robot an the Roborock.
@@ -204,6 +205,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean goToMapPosition(int x, int y) throws CommandExecutionException {
+        y = (y - 512) * -1 + 512;
         return goTo(x * 0.05f, y * 0.05f);
     }
 
@@ -244,7 +246,9 @@ public class Vacuum extends Device {
      * @return True if the command has been received correctly.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public boolean cleanAreafromMap(int x0, int y0, int x1, int y1, int passes) throws CommandExecutionException {
+    public boolean cleanAreaFromMap(int x0, int y0, int x1, int y1, int passes) throws CommandExecutionException {
+        y0 = (y0 - 512) * -1 + 512;
+        y1 = (y1 - 512) * -1 + 512;
         return cleanArea(x0 * 0.05f, y0 * 0.05f, x1 * 0.05f, y1 * 0.05f, passes);
     }
 
@@ -260,13 +264,13 @@ public class Vacuum extends Device {
      */
     public boolean cleanArea(float x0, float y0, float x1, float y1, int passes) throws CommandExecutionException {
         float t;
-        if (x0 < x1) {
+        if (x0 > x1) {
             t = x0;
             x0 = x1;
             x1 = t;
 
         }
-        if (y0 < y1) {
+        if (y0 > y1) {
             t = y0;
             y0 = y1;
             y1 = t;
@@ -347,5 +351,42 @@ public class Vacuum extends Device {
 
     public boolean testSoundVolume() throws CommandExecutionException {
         return sendOk("test_sound_volume");
+    }
+
+    public boolean manualControlStart() throws CommandExecutionException {
+        manualControlSequence = 1;
+        return sendOk("app_rc_start");
+    }
+
+    public boolean manualControlStop() throws CommandExecutionException {
+        manualControlSequence = -1;
+        return sendOk("app_rc_end");
+    }
+
+    /**
+     * Manually control the robot
+     * @param rotationSpeed The speed of rotation in deg/s.
+     * @param speed The speed of the robot in m/s. Must be greater then -0.3 and less then 0.3.
+     * @param runDuration The time to run the command.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public boolean manualControlMove(float rotationSpeed, float speed, int runDuration) throws CommandExecutionException {
+        if (manualControlSequence < 1) manualControlStart();
+        JSONObject payload = new JSONObject();
+        if (rotationSpeed > 180.0f) rotationSpeed = 180.0f;
+        if (rotationSpeed < -180.0f) rotationSpeed = -180.0f;
+        float rotationRadians = Math.round((rotationSpeed / 180.0f) * 272.0d) / 100.0f; //Found out after LOADS of tests.
+        payload.put("omega", rotationRadians);
+        if (speed >= 0.3f) speed = 0.29f;
+        if (speed <= -0.3f) speed = -0.29f;
+        payload.put("velocity", speed);
+        if (runDuration < 0) runDuration = 1000;
+        payload.put("duration", runDuration);
+        payload.put("seqnum", manualControlSequence);
+        manualControlSequence++;
+        JSONArray send = new JSONArray();
+        send.put(payload);
+        return sendOk("app_rc_move", send);
     }
 }
