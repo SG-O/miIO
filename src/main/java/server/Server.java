@@ -32,6 +32,19 @@ public class Server extends Thread{
     private long lifeTime;
     private JSONObject accessPoint;
 
+    /**
+     * Create a simple server.
+     * @param tk The token to encrypt the communication with.
+     * @param deviceId The devices ID used during communication.
+     * @param model The devices model identification.
+     * @param firmware The devices firmware version.
+     * @param hardware The devices hardware version.
+     * @param network The network the device is connected to.
+     * @param macAddress The devices mac address.
+     * @param lifeTime The total time the device has been running for
+     * @param accessPoint The access point the device is connected to.
+     * @throws SocketException When something went wrong during the creation of the listening socket.
+     */
     public Server(Token tk, int deviceId, String model, String firmware, String hardware, JSONObject network, String macAddress, long lifeTime, JSONObject accessPoint) throws SocketException {
         if (tk == null) { //if no token was provided generate a new random one
             Random rd = new Random();
@@ -73,10 +86,17 @@ public class Server extends Thread{
         this.socket.setSoTimeout(1000);
     }
 
+    /**
+     * Register a listener that handles device specific commands.
+     * @param listener The listener to add.
+     */
     public void registerOnServerEventListener(OnServerEventListener listener){
         this.listener.add(listener);
     }
 
+    /**
+     * Terminate the server.
+     */
     public void terminate() {
         this.running = false;
         while (!socket.isClosed()){
@@ -87,7 +107,9 @@ public class Server extends Thread{
         }
     }
 
-
+    /**
+     * Start the server.
+     */
     public void run() {
         this.running = true;
 
@@ -131,51 +153,87 @@ public class Server extends Thread{
         this.socket.close();
     }
 
+    /**
+     * @return The devices ID used during communication.
+     */
     public int getDeviceId() {
         return deviceId;
     }
 
+    /**
+     * @return The token to encrypt the communication with.
+     */
     public Token getTk() {
         return tk;
     }
 
+    /**
+     * @return The devices model identification.
+     */
     public String getModel() {
         return model;
     }
 
+    /**
+     * @return The devices firmware version.
+     */
     public String getFirmware() {
         return firmware;
     }
 
+    /**
+     * @return The devices hardware version.
+     */
     public String getHardware() {
         return hardware;
     }
 
+    /**
+     * @return The devices mac address.
+     */
     public String getMacAddress() {
         return macAddress;
     }
 
+    /**
+     * @return The network the device is connected to.
+     */
     public JSONObject getNetwork() {
         return network;
     }
 
+    /**
+     * @param network The network the device is connected to.
+     */
     public void setNetwork(JSONObject network) {
         if (network == null) return;
         this.network = network;
     }
 
+    /**
+     * @return The total time the device has been running for
+     */
     public long getLifeTime() {
         return lifeTime;
     }
 
+    /**
+     * @param lifeTime The total time the device has been running for
+     */
     public void setLifeTime(long lifeTime) {
         this.lifeTime = lifeTime;
     }
 
+    /**
+     * @return The access point the device is connected to.
+     */
     public JSONObject getAccessPoint() {
         return accessPoint;
     }
 
+    /**
+     * @param accessPoint The access point the device is connected to.
+     */
     public void setAccessPoint(JSONObject accessPoint) {
         if (accessPoint == null) return;
         this.accessPoint = accessPoint;
