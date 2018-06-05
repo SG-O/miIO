@@ -51,6 +51,8 @@ public class ByteArrayTest {
         byte[] o2 = toBytes(Long.MAX_VALUE,8);
         byte[] o3 = toBytes(Long.MIN_VALUE,8);
         byte[] o4 = toBytes(0,8);
+        byte[] o5 = toBytes(0,9);
+        byte[] o6 = toBytes(0,-5);
 
         assertEquals("FFFFFFFFFFFFFFFF", bytesToHex(o0));
         assertEquals(-1, fromBytes(o0));
@@ -63,6 +65,13 @@ public class ByteArrayTest {
         assertEquals("0000000000000000", bytesToHex(o4));
         assertEquals(0, fromBytes(o4));
         assertEquals(0, fromBytes(null));
+
+        assertEquals("0000000000000000", bytesToHex(o5));
+        assertEquals("", bytesToHex(o6));
+
+        byte[] b4 = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+        assertEquals(-1, fromBytes(b4));
+
         Random r = new Random();
         long l;
         byte[] o;
