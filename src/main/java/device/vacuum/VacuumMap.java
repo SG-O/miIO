@@ -19,6 +19,12 @@ public class VacuumMap implements Serializable {
     private Rectangle boundingBox;
     private int overSample;
 
+    /**
+     * Create a vacuum map object.
+     * @param image The reader the map image should be read from.
+     * @param slam The reader the slam log should be read from.
+     * @param overSample The oversampling that should be applied to the map.
+     */
     public VacuumMap(BufferedReader image, BufferedReader slam, int overSample) {
         if (overSample < 1) overSample = 1;
         this.overSample = overSample;
@@ -99,18 +105,32 @@ public class VacuumMap implements Serializable {
         }
     }
 
+    /**
+     * @return The complete map.
+     */
     public BufferedImage getMap() {
         return map;
     }
 
+    /**
+     * @return The path the vacuum took.
+     */
     public List<Point2D.Float> getPath() {
         return path;
     }
 
+    /**
+     * @return The bounding box of the active map area.
+     */
     public Rectangle getBoundingBox() {
         return boundingBox;
     }
 
+    /**
+     * Get coordinates from a rectangle in this map. They can be used to define the area of the area cleanup.
+     * @param rec The rectangle to convert.
+     * @return An array of coordinates (x0, y0, x1, y1).
+     */
     public int[] mapRectangleScale(Rectangle rec) {
         int[] scaled = new int[4];
         scaled[0] = rec.x / overSample;
@@ -120,20 +140,46 @@ public class VacuumMap implements Serializable {
         return scaled;
     }
 
+    /**
+     * @return The map with the path drawn into it within the bounding box. Using the color green for the start point and blue for the path.
+     */
     public BufferedImage getMapWithPathInBounds(){
-        BufferedImage raw = getMapWithPath();
+        return getMapWithPathInBounds(null, null);
+    }
+
+    /**
+     * @return The map with the path drawn into it within the bounding box.
+     * @param startColor The color the start point should be drawn with. If null is provided this will fall back to green.
+     * @param pathColor The color the path should be drawn with. If null is provided this will fall back to blue.
+     */
+    public BufferedImage getMapWithPathInBounds(Color startColor, Color pathColor){
+        BufferedImage raw = getMapWithPath(startColor, pathColor);
         return raw.getSubimage(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
     }
 
-    public BufferedImage getMapWithPath() {
+    /**
+     * @return The map with the path drawn into it. Using the color green for the start point and blue for the path.
+     */
+    public BufferedImage getMapWithPath(){
+        return getMapWithPath(null, null);
+    }
+
+    /**
+     * @return The map with the path drawn into it.
+     * @param startColor The color the start point should be drawn with. If null is provided this will fall back to green.
+     * @param pathColor The color the path should be drawn with. If null is provided this will fall back to blue.
+     */
+    public BufferedImage getMapWithPath(Color startColor, Color pathColor) {
+        if (startColor == null) startColor = Color.GREEN;
+        if (pathColor == null) pathColor = Color.BLUE;
         BufferedImage pathMap = new BufferedImage(1024 * overSample, 1024 * overSample, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D img = pathMap.createGraphics();
         img.drawImage(map, null,0, 0);
-        img.setBackground(Color.GREEN);
-        img.setColor(Color.GREEN);
+        img.setBackground(startColor);
+        img.setColor(startColor);
         int[] home = {(pathMap.getWidth() / 2) - (3 * overSample), (pathMap.getHeight() / 2) - (3 * overSample)};
         img.fillOval(home[0], home[1], 6 * overSample,6 * overSample);
-        img.setColor(Color.BLUE);
+        img.setColor(pathColor);
         BasicStroke bs = new BasicStroke(1);
         img.setStroke(bs);
         Point2D.Float prev = null;

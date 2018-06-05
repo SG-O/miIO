@@ -95,6 +95,8 @@ public class VacuumMapTest {
     public void getMapWithPathInBoundsTest() {
         assertEquals(644, m0.getMapWithPathInBounds().getHeight());
         assertEquals(492, m0.getMapWithPathInBounds().getWidth());
+        assertEquals(644, m0.getMapWithPathInBounds(Color.MAGENTA, Color.ORANGE).getHeight());
+        assertEquals(492, m0.getMapWithPathInBounds(Color.MAGENTA, Color.ORANGE).getWidth());
         assertEquals(161, m1.getMapWithPathInBounds().getHeight());
         assertEquals(123, m1.getMapWithPathInBounds().getWidth());
         assertEquals(2048, m2.getMapWithPathInBounds().getHeight());
@@ -106,6 +108,8 @@ public class VacuumMapTest {
         assertEquals(-8553091, m0.getMapWithPath().getRGB(0, 0));
         assertEquals(4096, m0.getMapWithPath().getHeight());
         assertEquals(4096, m0.getMapWithPath().getWidth());
+        assertEquals(-16776961, m0.getMapWithPath().getRGB(2048, 2048));
+        assertEquals(-14336, m0.getMapWithPath(Color.MAGENTA, Color.ORANGE).getRGB(2048, 2048));
         assertEquals(-8553091, m1.getMapWithPath().getRGB(0, 0));
         assertEquals(1024, m1.getMapWithPath().getHeight());
         assertEquals(1024, m1.getMapWithPath().getWidth());
