@@ -1,6 +1,7 @@
 package utilTest;
 
 import org.junit.Test;
+import util.ByteArray;
 
 import java.util.Random;
 
@@ -16,6 +17,12 @@ public class ByteArrayTest {
     private String s0 = "00010203";
     private String s1 = "090A7FFF";
     private String s2 = "";
+
+    @Test
+    public void byteArrayTest() {
+        ByteArray b = new ByteArray();
+        assertNotNull(b);
+    }
 
     @Test
     public void bytesToHexTest() {
