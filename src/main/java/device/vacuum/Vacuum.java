@@ -55,6 +55,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean setTimezone(ZoneId zone) throws CommandExecutionException {
+        if (zone == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray tz = new JSONArray();
         tz.put(zone.getId());
         return sendOk("set_timezone", tz);
@@ -79,6 +80,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean resetConsumable(VacuumConsumableStatus.Names consumable) throws CommandExecutionException {
+        if (consumable == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray params = new JSONArray();
         params.put(consumable.toString());
         return sendOk("reset_consumable", params);
@@ -157,6 +159,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean setFanSpeed(int speed) throws CommandExecutionException {
+        if (speed < 0 || speed > 100) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray params = new JSONArray();
         params.put(speed);
         return sendOk("set_custom_mode", params);
@@ -184,7 +187,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean addTimer(VacuumTimer timer) throws CommandExecutionException {
-        if (timer == null) return false;
+        if (timer == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray tm = timer.construct();
         if (tm == null) return false;
         JSONArray payload = new JSONArray();
@@ -199,7 +202,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean setTimerEnabled(VacuumTimer timer) throws CommandExecutionException {
-        if (timer == null) return false;
+        if (timer == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray payload = new JSONArray();
         payload.put(timer.getID());
         payload.put(timer.getOnOff());
@@ -213,7 +216,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean removeTimer(VacuumTimer timer) throws CommandExecutionException {
-        if (timer == null) return false;
+        if (timer == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray payload = new JSONArray();
         payload.put(timer.getID());
         return sendOk("del_timer", payload);
@@ -235,6 +238,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean setDoNotDisturb(VacuumDoNotDisturb dnd) throws CommandExecutionException {
+        if (dnd == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         return sendOk("set_dnd_timer", dnd.construct());
     }
 
@@ -279,7 +283,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean goTo(Point p) throws CommandExecutionException {
-        if (p == null) return false;
+        if (p == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray payload = new JSONArray();
         payload.put(p.x);
         payload.put(p.y);
@@ -342,7 +346,7 @@ public class Vacuum extends Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean cleanArea(Point bottomLeft, Point topRight, int passes) throws CommandExecutionException {
-        if (bottomLeft == null || topRight == null || passes < 1) return false;
+        if (bottomLeft == null || topRight == null || passes < 1) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray payload = new JSONArray();
         payload.put(bottomLeft.x);
         payload.put(bottomLeft.y);
@@ -462,7 +466,7 @@ public class Vacuum extends Device {
      * Manually control the robot
      * @param rotationSpeed The speed of rotation in deg/s.
      * @param speed The speed of the robot in m/s. Must be greater then -0.3 and less then 0.3.
-     * @param runDuration The time to run the command in ms.
+     * @param runDuration The time to run the command in ms. Values less than 0 will be replaced by a default value of 1000ms.
      * @return True if the command has been received correctly.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
@@ -553,9 +557,9 @@ public class Vacuum extends Device {
      * @return The vacuums serial number.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public JSONObject getSerialnumber() throws CommandExecutionException {
+    public String getSerialnumber() throws CommandExecutionException {
         JSONArray ret = sendToArray("get_serial_number");
         if (ret == null) return null;
-        return ret.optJSONObject(0);
+        return ret.optJSONObject(0).optString("serial_number");
     }
 }

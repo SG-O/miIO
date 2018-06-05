@@ -149,14 +149,11 @@ public class DeviceTest {
         assertEquals(new VacuumDoNotDisturb(null, null), d1.getDoNotDisturb());
 
         assertTrue(d1.goTo(new Point()));
-        assertFalse(d1.goTo(null));
+
         assertTrue(d1.goTo(0.0f, 0.0f));
         assertTrue(d1.goToMapPosition(0, 0));
 
         assertTrue(d1.cleanArea(new Point(), new Point(), 1));
-        assertFalse(d1.cleanArea(null, new Point(), 1));
-        assertFalse(d1.cleanArea(new Point(), null, 1));
-        assertFalse(d1.cleanArea(new Point(), new Point(), 0));
         assertTrue(d1.cleanArea(0.0f, 0.0f, 1.0f, 1.0f, 1));
         assertTrue(d1.cleanAreaFromMap(0,0,1,1,1));
         assertTrue(d1.cleanAreaFromMap(1,1,0,0,1));
@@ -202,7 +199,7 @@ public class DeviceTest {
         assertTrue(d1.setCarpetMode(true, 500, 400, 450, 10));
         assertEquals("{\"current_high\":500,\"stall_time\":10,\"current_low\":400,\"enable\":1,\"current_integral\":450}", d1.getCarpetModeState().toString());
 
-        assertEquals("{\"serial_number\":\"0000000000001\"}", d1.getSerialnumber().toString());
+        assertEquals("0000000000001", d1.getSerialnumber());
 
         ts1.terminate();
     }
@@ -230,6 +227,79 @@ public class DeviceTest {
         } catch (CommandExecutionException e){
             assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
         }
+        try {
+            d0.goTo(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.cleanArea(null, new Point(), 1);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.cleanArea(new Point(), null, 1);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.cleanArea(new Point(), new Point(), 0);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.setTimezone(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.resetConsumable(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.setFanSpeed(500);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.setFanSpeed(-1);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.addTimer(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.setTimerEnabled(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.removeTimer(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.setDoNotDisturb(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+
         assertFalse(d0.discover());
     }
 }
