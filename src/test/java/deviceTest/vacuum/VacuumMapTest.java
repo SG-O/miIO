@@ -4,6 +4,7 @@ import device.vacuum.VacuumMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.*;
 import java.io.*;
 import java.util.Objects;
 
@@ -65,6 +66,29 @@ public class VacuumMapTest {
         assertEquals(123, m1.getBoundingBox().width);
         assertEquals(2048, m2.getBoundingBox().height);
         assertEquals(2048, m2.getBoundingBox().width);
+    }
+
+    @Test
+    public void mapRectangleScaleTest() {
+        Rectangle r0 = new Rectangle(200, 400, 20, 40);
+        int[] b0 = m0.mapRectangleScale(r0);
+        int[] b1 = m1.mapRectangleScale(r0);
+        int[] b2 = m2.mapRectangleScale(r0);
+
+        assertEquals(50, b0[0]);
+        assertEquals(100, b0[1]);
+        assertEquals(55, b0[2]);
+        assertEquals(110, b0[3]);
+
+        assertEquals(200, b1[0]);
+        assertEquals(400, b1[1]);
+        assertEquals(220, b1[2]);
+        assertEquals(440, b1[3]);
+
+        assertEquals(100, b2[0]);
+        assertEquals(200, b2[1]);
+        assertEquals(110, b2[2]);
+        assertEquals(220, b2[3]);
     }
 
     @Test

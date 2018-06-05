@@ -111,6 +111,15 @@ public class VacuumMap implements Serializable {
         return boundingBox;
     }
 
+    public int[] mapRectangleScale(Rectangle rec) {
+        int[] scaled = new int[4];
+        scaled[0] = rec.x / overSample;
+        scaled[1] = rec.y / overSample;
+        scaled[2] = (rec.x / overSample) + (rec.width / overSample);
+        scaled[3] = (rec.y / overSample) + (rec.height / overSample);
+        return scaled;
+    }
+
     public BufferedImage getMapWithPathInBounds(){
         BufferedImage raw = getMapWithPath();
         return raw.getSubimage(boundingBox.x, boundingBox.y, boundingBox.width, boundingBox.height);
