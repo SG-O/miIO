@@ -339,8 +339,8 @@ public class Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean update(String url, String md5) throws CommandExecutionException {
-        if (url == null || md5 == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-        if (md5.length() != 32) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (url == null || md5 == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+        if (md5.length() != 32) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONObject params = new JSONObject();
         params.put("mode","normal");
         params.put("install", "1");
@@ -384,7 +384,7 @@ public class Device {
     }
 
     public boolean configureRouter(String ssid, String password, int uid) throws CommandExecutionException {
-        if (ssid == null || password == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+        if (ssid == null || password == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONObject params = new JSONObject();
         params.put("ssid",ssid);
         params.put("passwd", password);
