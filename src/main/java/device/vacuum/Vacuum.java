@@ -36,6 +36,11 @@ public class Vacuum extends Device {
         return new VacuumStatus(stat);
     }
 
+    /**
+     * Get the vacuums current timezone.
+     * @return The current timezone.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public ZoneId getTimezone() throws CommandExecutionException {
         JSONArray resp = sendToArray("get_timezone");
         String zone = resp.optString(0, null);
@@ -43,6 +48,12 @@ public class Vacuum extends Device {
         return ZoneId.of(zone);
     }
 
+    /**
+     * Set the vacuums timezone
+     * @param zone The new timezone to set.
+     * @return True if the command has been received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean setTimezone(ZoneId zone) throws CommandExecutionException {
         JSONArray tz = new JSONArray();
         tz.put(zone.getId());
@@ -151,6 +162,11 @@ public class Vacuum extends Device {
         return sendOk("set_custom_mode", params);
     }
 
+    /**
+     * Get all stored scheduled cleanups.
+     * @return An array with all timers. Is empty if no timer has been set on the device.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public VacuumTimer[] getTimers() throws CommandExecutionException {
         JSONArray tm = sendToArray("get_timer");
         if (tm == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
@@ -161,6 +177,12 @@ public class Vacuum extends Device {
         return timers;
     }
 
+    /**
+     * Add a new scheduled cleanup.
+     * @param timer The new timer to set.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean addTimer(VacuumTimer timer) throws CommandExecutionException {
         if (timer == null) return false;
         JSONArray tm = timer.construct();
@@ -170,6 +192,12 @@ public class Vacuum extends Device {
         return sendOk("set_timer", payload);
     }
 
+    /**
+     * Enable or disable a scheduled cleanup.
+     * @param timer The timer to update.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean setTimerEnabled(VacuumTimer timer) throws CommandExecutionException {
         if (timer == null) return false;
         JSONArray payload = new JSONArray();
@@ -178,6 +206,12 @@ public class Vacuum extends Device {
         return sendOk("upd_timer", payload);
     }
 
+    /**
+     * Delete a scheduled cleanup.
+     * @param timer The timer to remove.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean removeTimer(VacuumTimer timer) throws CommandExecutionException {
         if (timer == null) return false;
         JSONArray payload = new JSONArray();
@@ -185,14 +219,30 @@ public class Vacuum extends Device {
         return sendOk("del_timer", payload);
     }
 
+    /**
+     * Get the current do not disturb settings from the device
+     * @return The do not disturb settings.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public VacuumDoNotDisturb getDoNotDisturb() throws CommandExecutionException {
         return new VacuumDoNotDisturb(sendToArray("get_dnd_timer"));
     }
 
+    /**
+     * Set the do not disturb timer.
+     * @param dnd The new settings to set.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean setDoNotDisturb(VacuumDoNotDisturb dnd) throws CommandExecutionException {
         return sendOk("set_dnd_timer", dnd.construct());
     }
 
+    /**
+     * Disable the do not disturb timer.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean disableDoNotDisturb() throws CommandExecutionException {
         return sendOk("close_dnd_timer");
     }
@@ -308,18 +358,38 @@ public class Vacuum extends Device {
         return sendToArray("get_clean_summary");
     }
 
+    /**
+     * Get the total time the vacuum has been cleaning.
+     * @return The time the device spent cleaning.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public long getTotalCleaningTime() throws CommandExecutionException {
         return getCleaningSummary().optLong(0);
     }
 
+    /**
+     * Get the vacuums total cleaned area.
+     * @return The total area the device has cleaned.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public long getTotalCleanedArea() throws CommandExecutionException {
         return getCleaningSummary().optLong(1);
     }
 
+    /**
+     * Get the total number of cleanups the vacuum has performed.
+     * @return The number of cleanups the device has performed.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public long getTotalCleans() throws CommandExecutionException {
         return getCleaningSummary().optLong(2);
     }
 
+    /**
+     * Get an array with the details of all cleanups.
+     * @return An array with the details of all cleanups. Empty if no cleanups were performed.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public VacuumCleanup[] getAllCleanups() throws CommandExecutionException {
         JSONArray cleanupIDs = getCleaningSummary().optJSONArray(3);
         if (cleanupIDs == null) return null;
@@ -333,6 +403,11 @@ public class Vacuum extends Device {
         return res;
     }
 
+    /**
+     * Get the current volume.
+     * @return The current set volume of the device between 0 and 100.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public int getSoundVolume() throws CommandExecutionException {
         JSONArray res = sendToArray("get_sound_volume");
         if (res == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
@@ -341,6 +416,12 @@ public class Vacuum extends Device {
         return vol;
     }
 
+    /**
+     * Set the vacuums volume.
+     * @param volume The volume between 0 and 100.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean setSoundVolume(int volume) throws CommandExecutionException {
         if (volume < 0) volume = 0;
         if (volume > 100) volume = 100;
@@ -349,15 +430,29 @@ public class Vacuum extends Device {
         return sendOk("change_sound_volume", payload);
     }
 
+    /** Make the vacuum produce a test sound.
+     * @return True if the command was received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean testSoundVolume() throws CommandExecutionException {
         return sendOk("test_sound_volume");
     }
 
+    /**
+     * Enable manual remote controls.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean manualControlStart() throws CommandExecutionException {
         manualControlSequence = 1;
         return sendOk("app_rc_start");
     }
 
+    /**
+     * Disable manual remote controls.
+     * @return True if the command has been received correctly.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean manualControlStop() throws CommandExecutionException {
         manualControlSequence = -1;
         return sendOk("app_rc_end");
@@ -367,7 +462,7 @@ public class Vacuum extends Device {
      * Manually control the robot
      * @param rotationSpeed The speed of rotation in deg/s.
      * @param speed The speed of the robot in m/s. Must be greater then -0.3 and less then 0.3.
-     * @param runDuration The time to run the command.
+     * @param runDuration The time to run the command in ms.
      * @return True if the command has been received correctly.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
@@ -390,6 +485,14 @@ public class Vacuum extends Device {
         return sendOk("app_rc_move", send);
     }
 
+    /**
+     * Install a new soundpack to the device.
+     * @param url The url the soundpack should be downloaded from.
+     * @param md5 The md5 checksum of the new soundpack.
+     * @param soundId The ID of the soundpacks language.
+     * @return The current installation status.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public VacuumSounpackInstallState installSoundpack(String url, String md5, int soundId) throws CommandExecutionException {
         if (url == null || md5 == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONObject install = new JSONObject();
@@ -401,18 +504,38 @@ public class Vacuum extends Device {
         return new VacuumSounpackInstallState(ret.optJSONObject(0));
     }
 
+    /**
+     * Get the current soundpack installation status.
+     * @return The current soundpack installation status.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public VacuumSounpackInstallState soundpackInstallStatus() throws CommandExecutionException {
         JSONArray ret = sendToArray("get_sound_progress");
         if (ret == null) return null;
         return new VacuumSounpackInstallState(ret.optJSONObject(0));
     }
 
+    /**
+     * Get the current carpet cleaning settings.
+     * @return The current carpet cleaning settings.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONObject getCarpetModeState() throws CommandExecutionException {
         JSONArray ret = sendToArray("get_carpet_mode");
         if (ret == null) return null;
         return ret.optJSONObject(0);
     }
 
+    /**
+     * Change the carped cleaning settings.
+     * @param enabled Weather the carped cleanup mode should be enabled.
+     * @param high The high parameter of the carped cleanup.
+     * @param low The low parameter of the carped cleanup.
+     * @param integral The integral parameter of the carped cleanup.
+     * @param stallTime The stall time parameter of the carped cleanup.
+     * @return True if the command has been received successfully.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public boolean setCarpetMode(boolean enabled, int high, int low, int integral, int stallTime) throws CommandExecutionException {
         JSONObject payload = new JSONObject();
         payload.put("enable", enabled ? 1:0);
@@ -425,6 +548,11 @@ public class Vacuum extends Device {
         return sendOk("set_carpet_mode", send);
     }
 
+    /**
+     * Get the vacuums serial number.
+     * @return The vacuums serial number.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
     public JSONObject getSerialnumber() throws CommandExecutionException {
         JSONArray ret = sendToArray("get_serial_number");
         if (ret == null) return null;
