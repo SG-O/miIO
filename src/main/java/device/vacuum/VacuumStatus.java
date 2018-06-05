@@ -108,6 +108,20 @@ public class VacuumStatus {
     private int msgSeq = 0;
     private int cleanTime = 0;
 
+    /**
+     * Create a new vacuum status object.
+     * @param dndEnabled Whether the do not disturb period is active.
+     * @param mapPresent Whether a valid map is present.
+     * @param cleanArea The total cleaned area.
+     * @param fanPower The current fan power.
+     * @param msgVersion The message version.
+     * @param inCleaning Whether the vacuum is currently cleaning.
+     * @param errorCode The current error.
+     * @param state The current status.
+     * @param battery The current battery level.
+     * @param msgSeq The message sequence.
+     * @param cleanTime The total time spent cleaning.
+     */
     public VacuumStatus(boolean dndEnabled, boolean mapPresent, int cleanArea, int fanPower, int msgVersion, boolean inCleaning, Error errorCode, State state, int battery, int msgSeq, int cleanTime) {
         this.dndEnabled = dndEnabled;
         this.mapPresent = mapPresent;
@@ -122,6 +136,10 @@ public class VacuumStatus {
         this.cleanTime = cleanTime;
     }
 
+    /**
+     * Generate a new vacuum status object from the response of a device.
+     * @param status The response to parse.
+     */
     public VacuumStatus(JSONObject status) {
         if (status != null){
             dndEnabled = status.optInt("dnd_enabled") == 1;
@@ -138,6 +156,10 @@ public class VacuumStatus {
         }
     }
 
+    /**
+     * Construct the message the vacuum sends to the controlling device.
+     * @return The constructed message.
+     */
     public JSONObject construct(){
         JSONObject payload = new JSONObject();
         payload.put("dnd_enabled", dndEnabled ? 1 : 0);
@@ -154,90 +176,156 @@ public class VacuumStatus {
         return payload;
     }
 
+    /**
+     * @return Whether the do not disturb period is active.
+     */
     public boolean isDndEnabled() {
         return dndEnabled;
     }
 
+    /**
+     * @param dndEnabled Whether the do not disturb period is active.
+     */
     public void setDndEnabled(boolean dndEnabled) {
         this.dndEnabled = dndEnabled;
     }
 
+    /**
+     * @return Whether a valid map is present.
+     */
     public boolean isMapPresent() {
         return mapPresent;
     }
 
+    /**
+     * @param mapPresent Whether a valid map is present.
+     */
     public void setMapPresent(boolean mapPresent) {
         this.mapPresent = mapPresent;
     }
 
+    /**
+     * @return The total cleaned area.
+     */
     public int getCleanArea() {
         return cleanArea;
     }
 
+    /**
+     * @param cleanArea The total cleaned area.
+     */
     public void setCleanArea(int cleanArea) {
         this.cleanArea = cleanArea;
     }
 
+    /**
+     * @return The current fan power.
+     */
     public int getFanPower() {
         return fanPower;
     }
 
+    /**
+     * @param fanPower The current fan power.
+     */
     public void setFanPower(int fanPower) {
         this.fanPower = fanPower;
     }
 
+    /**
+     * @return The message version.
+     */
     public int getMsgVersion() {
         return msgVersion;
     }
 
+    /**
+     * @param msgVersion The message version.
+     */
     public void setMsgVersion(int msgVersion) {
         this.msgVersion = msgVersion;
     }
 
+    /**
+     * @return Whether the vacuum is currently cleaning.
+     */
     public boolean isInCleaning() {
         return inCleaning;
     }
 
+    /**
+     * @param inCleaning Whether the vacuum is currently cleaning.
+     */
     public void setInCleaning(boolean inCleaning) {
         this.inCleaning = inCleaning;
     }
 
+    /**
+     * @return The current error.
+     */
     public Error getErrorCode() {
         return errorCode;
     }
 
+    /**
+     * @param errorCode The current error.
+     */
     public void setErrorCode(Error errorCode) {
         this.errorCode = errorCode;
     }
 
+    /**
+     * @return The current status.
+     */
     public State getState() {
         return state;
     }
 
+    /**
+     * @param state The current status.
+     */
     public void setState(State state) {
         this.state = state;
     }
 
+    /**
+     * @return The current battery level.
+     */
     public int getBattery() {
         return battery;
     }
 
+    /**
+     * @param battery The current battery level.
+     */
     public void setBattery(int battery) {
         this.battery = battery;
     }
 
+    /**
+     * @return The message sequence.
+     */
     public int getMsgSeq() {
         return msgSeq;
     }
 
+    /**
+     * @param msgSeq The message sequence.
+     */
     public void setMsgSeq(int msgSeq) {
         this.msgSeq = msgSeq;
     }
 
+    /**
+     * @return The total time spent cleaning.
+     */
     public int getCleanTime() {
         return cleanTime;
     }
 
+    /**
+     * @param cleanTime The total time spent cleaning.
+     */
     public void setCleanTime(int cleanTime) {
         this.cleanTime = cleanTime;
     }
