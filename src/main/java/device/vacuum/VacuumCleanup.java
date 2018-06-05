@@ -12,6 +12,14 @@ public class VacuumCleanup {
     private long area;
     private boolean completed;
 
+    /**
+     * Create a new cleanup information object.
+     * @param start The time the cleanup was started.
+     * @param end The time the cleanup was finished.
+     * @param runtime The total runtime of this cleanup.
+     * @param area The cleaned area.
+     * @param completed Weather this cleanup was completed.
+     */
     public VacuumCleanup(Instant start, Instant end, long runtime, long area, boolean completed) {
         if (start == null || end == null || runtime < 0){
             start = Instant.now();
@@ -26,6 +34,10 @@ public class VacuumCleanup {
         this.completed = completed;
     }
 
+    /**
+     * Generate a new cleanup information object from the response of a device.
+     * @param msg The response to parse.
+     */
     public VacuumCleanup(JSONArray msg) {
         if (msg == null){
             this.start = Instant.now();
@@ -40,26 +52,45 @@ public class VacuumCleanup {
         }
     }
 
+    /**
+     * @return The start time of the cleanup.
+     */
     public Instant getStart() {
         return start;
     }
 
+    /**
+     * @return The end time of the cleanup.
+     */
     public Instant getEnd() {
         return end;
     }
 
+    /**
+     * @return The total runtime of the cleanup.
+     */
     public long getRuntime() {
         return runtime;
     }
 
+    /**
+     * @return The cleaned area.
+     */
     public long getArea() {
         return area;
     }
 
+    /**
+     * @return True if the cleanup has been completed successfully.
+     */
     public boolean isCompleted() {
         return completed;
     }
 
+    /**
+     * Construct the message the vacuum sends to the controlling device.
+     * @return The constructed message.
+     */
     public JSONArray construct(){
         JSONArray ret = new JSONArray();
         ret.put(start.getEpochSecond());
