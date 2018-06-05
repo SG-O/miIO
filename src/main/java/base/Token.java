@@ -44,16 +44,27 @@ public class Token {
         return token;
     }
 
+    /**
+     * @return Check whether the tokens length matches the expected length.
+     */
     public boolean checkToken() {
         return token.length == 16;
     }
 
+    /**
+     * @return The md5 checksum of the token.
+     * @throws NoSuchAlgorithmException When the platform doesn't support the md5 algorithm.
+     */
     public byte[] getMd5() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(token);
         return md.digest();
     }
 
+    /**
+     * @return The initial value for encryption.
+     * @throws NoSuchAlgorithmException When the platform doesn't support the md5 algorithm.
+     */
     public byte[] getIv() throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance("MD5");
         md.update(ByteArray.append(getMd5(),token));
@@ -78,6 +89,11 @@ public class Token {
         return ByteArray.bytesToHex(token).toLowerCase();
     }
 
+    /**
+     * Encrypt a message with this token.
+     * @param msg The message to encrypt.
+     * @return The encrypted message. Null if encryption failed.
+     */
     public byte[] encrypt(byte[] msg) {
         if (msg == null) return null;
         try {
@@ -91,6 +107,11 @@ public class Token {
         }
     }
 
+    /**
+     * Decrypt a message with this token.
+     * @param msg The message to decrypt.
+     * @return The encrypted message. Null if decryption failed.
+     */
     public byte[] decrypt(byte[] msg) {
         if (msg == null) return null;
         try {
