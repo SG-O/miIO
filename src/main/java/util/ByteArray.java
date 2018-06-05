@@ -4,6 +4,11 @@ public class ByteArray {
     public static final int UNSIGNED_FFFFFFFF = -1;
     private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
 
+    /**
+     * Convert a byte array to a hexadecimal string.
+     * @param bytes The byte array to convert.
+     * @return The hexadecimal representation of that array.
+     */
     public static String bytesToHex(byte[] bytes) {
         if (bytes == null) return "";
         char[] hexChars = new char[bytes.length * 2];
@@ -15,6 +20,11 @@ public class ByteArray {
         return new String(hexChars);
     }
 
+    /**
+     * Convert a hexadecimal string to a byte array.
+     * @param s The hexadecimal string to convert.
+     * @return The byte array of that string. Null if conversion was not possible.
+     */
     public static byte[] hexToBytes(String s) {
         try {
             if (s == null) return new byte[0];
@@ -31,6 +41,12 @@ public class ByteArray {
         }
     }
 
+    /**
+     * Add two byte arrays to each other.
+     * @param first The first array.
+     * @param second The second byte array that should be appended to the first array.
+     * @return The two arrays appended to ech other. Null if either input is null.
+     */
     public static byte[] append(byte[] first, byte[] second) {
         if ((first == null) || (second == null)) return null;
         byte[] output = new byte[first.length + second.length];
@@ -39,6 +55,12 @@ public class ByteArray {
         return output;
     }
 
+    /**
+     * Convert a long to a byte array.
+     * @param value The long to convert.
+     * @param length The number of bytes to convert to. This allows for the conversion of shorts and ints.
+     * @return The converted long as a byte array.
+     */
     public static byte[] toBytes(long value, int length) {
         if (length <= 0) return new byte[0];
         if (length > 8) length = 8;
@@ -50,6 +72,11 @@ public class ByteArray {
         return out;
     }
 
+    /**
+     * Convert a byte array to a long.
+     * @param value The array to convert.
+     * @return The long value.
+     */
     public static long fromBytes(byte[] value){
         if (value == null) return 0;
         long out = 0;
