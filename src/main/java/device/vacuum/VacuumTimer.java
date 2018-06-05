@@ -17,6 +17,14 @@ public class VacuumTimer {
     private Set<DayOfWeek> runDays;
     private JSONArray job;
 
+    /**
+     * Create a new vacuum timer object.
+     * @param ID The timer ID. If null a new DI will be created from the current system time.
+     * @param enabled Whether the timer is enabled.
+     * @param time The time to start the job.
+     * @param runDays The days to run the job at. If null or an empty set, it will be run every day.
+     * @param job The job description.
+     */
     public VacuumTimer(String ID, boolean enabled, LocalTime time, Set<DayOfWeek> runDays, JSONArray job) {
         if (ID == null) ID = Long.valueOf(System.currentTimeMillis()).toString();
         this.ID = ID;
@@ -27,6 +35,14 @@ public class VacuumTimer {
         this.job = job;
     }
 
+    /**
+     * Create a new vacuum timer object.
+     * @param ID The timer ID. If null a new DI will be created from the current system time.
+     * @param enabled Whether the timer is enabled.
+     * @param hour The hour to start the job.
+     * @param minute The minute to start the job at.
+     * @param runDays The days to run the job at. If null or an empty set, it will be run every day.
+     */
     public VacuumTimer(String ID, boolean enabled, int hour, int minute, Set<DayOfWeek> runDays) {
         if (ID == null) ID = Long.valueOf(System.currentTimeMillis()).toString();
         this.ID = ID;
@@ -40,6 +56,11 @@ public class VacuumTimer {
         this.runDays = runDays;
     }
 
+    /**
+     * Generate a new vacuum timer object from the response of a device.
+     * @param timer The response to parse.
+     * @throws CommandExecutionException WHen the response was invalid.
+     */
     public VacuumTimer(JSONArray timer) throws CommandExecutionException {
         if (timer == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         int length = timer.length();
@@ -60,7 +81,7 @@ public class VacuumTimer {
             this.job = jobArray.optJSONArray(1);
         } else {
             throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-    }
+        }
     }
 
     private void parseCron(String cron) throws CommandExecutionException {
@@ -108,10 +129,19 @@ public class VacuumTimer {
         return time.getMinute() + " " + time.getHour() + " * * " + days.toString();
     }
 
+    /**
+     * Construct the message the controlling device sends to the vacuum.
+     * @return The constructed message.
+     */
     public JSONArray construct(){
         return construct(false);
     }
 
+    /**
+     * Construct the message the vacuum sends to the controlling device or the device sends to the vacuum.
+     * @param server True if the constructed message is in the format from vacuum to controlling device.
+     * @return The constructed message.
+     */
     public JSONArray construct(boolean server){
         JSONArray jobArray = new JSONArray();
         String cron = generateCron();
@@ -133,34 +163,58 @@ public class VacuumTimer {
         return timer;
     }
 
+    /**
+     * @return The timers ID.
+     */
     public String getID() {
         return ID;
     }
 
+    /**
+     * @return Whether the timer is enabled.
+     */
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * @return Whether the timer is enabled Either "on" or "fff".
+     */
     public String getOnOff(){
         return enabled ? "on" : "off";
     }
 
+    /**
+     * @param enabled Whether the timer is enabled.
+     */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
+    /**
+     * @return The time to start the job.
+     */
     public LocalTime getTime() {
         return time;
     }
 
+    /**
+     * @return The days to run the job at. If an empty set, it will be run every day.
+     */
     public Set<DayOfWeek> getRunDays() {
         return runDays;
     }
 
+    /**
+     * @return The job description.
+     */
     public JSONArray getJob() {
         return job;
     }
 
+    /**
+     * @param job The job description.
+     */
     public void setJob(JSONArray job) {
         this.job = job;
     }
