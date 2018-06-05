@@ -73,6 +73,13 @@ public class VacuumSounpackInstallState {
     private Error error;
     private int sid;
 
+    /**
+     * Create a new sounpack installation status object.
+     * @param progress The installation progress. Must be between 0 including and 100 including.
+     * @param state The installation status.
+     * @param error The installation error.
+     * @param sid The sounpack language id.
+     */
     public VacuumSounpackInstallState(int progress, State state, Error error, int sid) {
         if (progress < 0) progress = 0;
         if (progress > 100) progress = 100;
@@ -84,6 +91,10 @@ public class VacuumSounpackInstallState {
         this.sid = sid;
     }
 
+    /**
+     * Generate a new sounpack installation status object from the response of a device.
+     * @param info The response to parse.
+     */
     public VacuumSounpackInstallState(JSONObject info) {
         if (info == null) {
             this.progress = 0;
@@ -98,43 +109,72 @@ public class VacuumSounpackInstallState {
         }
     }
 
+    /**
+     * @return The installation progress.
+     */
     public int getProgress() {
         return progress;
     }
 
+    /**
+     * @param progress The installation progress. Must be between 0 including and 100 including.
+     */
     public void setProgress(int progress) {
         if (progress < 0) progress = 0;
         if (progress > 100) progress = 100;
         this.progress = progress;
     }
 
+    /**
+     * @return The installation status.
+     */
     public State getState() {
         return state;
     }
 
+    /**
+     * @param state The installation status.
+     */
     public void setState(State state) {
         if (state == null) state = State.UNKNOWN;
         this.state = state;
     }
 
+    /**
+     * @return The installation error.
+     */
     public Error getError() {
         return error;
     }
 
+    /**
+     * @param error The installation error.
+     */
     public void setError(Error error) {
         if (error == null) error = Error.UNKNOWN;
         this.error = error;
     }
 
+    /**
+     * @return The sounpack language id.
+     */
     public int getSid() {
         return sid;
     }
 
+    /**
+     * @param sid The sounpack language id.
+     */
     public void setSid(int sid) {
         if (error == null) error = Error.UNKNOWN;
         this.sid = sid;
     }
 
+    /**
+     * Construct the message the vacuum sends to the controlling device.
+     * @param includeSid Whether to include the sounpack language id.
+     * @return The constructed message.
+     */
     public JSONObject construct(boolean includeSid){
         JSONObject ret = new JSONObject();
         ret.put("progress", progress);
