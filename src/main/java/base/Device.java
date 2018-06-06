@@ -98,6 +98,7 @@ public class Device {
         if (!((response.getDeviceID() == -1) || (response.getTimeStamp() == -1))){
             deviceID = response.getDeviceID();
             timeStamp = response.getTimeStamp();
+            methodID = timeStamp & 0b1111111111111; // Possible collision about every 2 hours > acceptable
             if (this.acceptableModels != null){
                 boolean modelOk = false;
                 for (String s: this.acceptableModels) {
@@ -130,9 +131,6 @@ public class Device {
             }
             if (helloResponse) break;
         }
-        if (helloResponse) {
-            methodID = this.timeStamp & 0b1111111111111; // Possible collision about every 2 hours > acceptable
-        }
         return helloResponse;
     }
 
@@ -145,10 +143,6 @@ public class Device {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public Response send(String method, Object params) throws CommandExecutionException {
-        return send(method, params, this.retries);
-    }
-
-    private Response send(String method, Object params, int sendRetries) throws CommandExecutionException {
         if (deviceID == -1 || timeStamp == -1 || token == null || ip == null) {
             if (!discover()) throw new CommandExecutionException(CommandExecutionException.Error.DEVICE_NOT_FOUND);
         }
@@ -158,16 +152,64 @@ public class Device {
         timeStamp++;
         Command msg = new Command(this.token,this.deviceID,timeStamp,this.methodID,method,params);
         methodID++;
-        byte[] binMsg = msg.create();
+        int retriesLeft = this.retries;
+        while (true) {
+            try {
+                return parseResponse(send(msg.create()));
+            } catch (CommandExecutionException e) {
+                if (retriesLeft > 0){
+                    retriesLeft--;
+                    continue;
+                }
+                throw e;
+            }
+        }
+    }
 
+    /**
+     * Send an arbitrary string as payload to the device.
+     * @param payload The string to send.
+     * @return The response of the device as an unparsed string.
+     * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
+     */
+    public String send(String payload) throws CommandExecutionException {
+        if (payload == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+        if (deviceID == -1 || timeStamp == -1 || token == null || ip == null) {
+            if (!discover()) throw new CommandExecutionException(CommandExecutionException.Error.DEVICE_NOT_FOUND);
+        }
+        if (methodID >= 10000) methodID = 1;
+        if (ip == null || token == null) throw new CommandExecutionException(CommandExecutionException.Error.IP_OR_TOKEN_UNKNOWN);
+        if (socket == null) return null;
+        timeStamp++;
+        Command msg = new Command(this.token,this.deviceID,timeStamp,this.methodID,"", null);
+        methodID++;
+        int retriesLeft = this.retries;
+        while (true) {
+            try {
+                byte[] resp = send(msg.create(payload));
+                if (!Response.testMessage(resp, this.token)) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+                if (resp.length > 0x20) {
+                    byte[] pl = new byte[resp.length - 0x20];
+                    System.arraycopy(resp, 0x20, pl, 0, pl.length);
+                    String payloadString = Response.decryptPayload(pl, this.token);
+                    if (payloadString == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+                    return payloadString;
+                }
+            } catch (CommandExecutionException e) {
+                if (retriesLeft > 0){
+                    retriesLeft--;
+                    continue;
+                }
+                throw e;
+            }
+        }
+    }
+
+    private byte[] send(byte[] binMsg) throws CommandExecutionException {
         DatagramPacket packet = new DatagramPacket(binMsg, binMsg.length, ip, PORT);
         try {
             socket.send(packet);
         } catch (SocketTimeoutException to){
-            if (sendRetries > 0){
-                sendRetries--;
-                return send(method, params, sendRetries);
-            }
             throw new CommandExecutionException(CommandExecutionException.Error.TIMEOUT);
         } catch (IOException e) {
             return null;
@@ -176,10 +218,6 @@ public class Device {
         try {
             socket.receive(packet);
         } catch (SocketTimeoutException to){
-            if (sendRetries > 0){
-                sendRetries--;
-                return send(method, params, sendRetries);
-            }
             throw new CommandExecutionException(CommandExecutionException.Error.TIMEOUT);
         } catch (IOException e) {
             return null;
@@ -189,31 +227,19 @@ public class Device {
         int length = (int)ByteArray.fromBytes(worker);
         worker = new byte[length];
         System.arraycopy(rcv, 0, worker, 0, length);
-        return parseResponse(worker, method, params, sendRetries);
+        return worker;
     }
 
-    private Response parseResponse(byte[] rawData, String method, Object params, int sendRetries) throws CommandExecutionException {
+    private Response parseResponse(byte[] rawData) throws CommandExecutionException {
         Response response = new Response(rawData, this.token);
         if (!response.isValid()) {
-            if (sendRetries > 0){
-                sendRetries--;
-                return send(method, params, sendRetries);
-            }
             throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         }
         if (response.getPayloadID() != (methodID - 1)){
-            if (sendRetries > 0){
-                sendRetries--;
-                return send(method, params, sendRetries);
-            }
             throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         }
         if (!((response.getDeviceID() == -1) || (response.getTimeStamp() == -1))){
             if (response.getParams() == null) {
-                if (sendRetries > 0){
-                    sendRetries--;
-                    return send(method, params, sendRetries);
-                }
                 throw new CommandExecutionException(CommandExecutionException.Error.EMPTY_RESPONSE);
             }
             if (response.getParams().getClass() == String.class){

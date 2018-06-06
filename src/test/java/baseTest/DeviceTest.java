@@ -32,6 +32,7 @@ public class DeviceTest {
 
         Device d0 = new Device(InetAddress.getByName("127.0.0.1"), ts0.getTk(), null, 0, 2);
         assertEquals(ts0.getMacAddress(), d0.info().optString("mac"));
+        assertEquals("{\"result\":\"unknown_method\",\"id\":0}", d0.send("{\"method\":\"get_status\",\"id\":0}"));
         assertEquals(ts0.getModel(), d0.model());
         assertEquals(ts0.getFirmware(), d0.firmware());
         assertTrue(d0.update("127.0.0.1", "6cd9eb1aee36e091974f259ea81621fa"));
@@ -299,7 +300,12 @@ public class DeviceTest {
         } catch (CommandExecutionException e){
             assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
         }
-
+        try {
+            d0.send(null);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
         assertFalse(d0.discover());
     }
 }

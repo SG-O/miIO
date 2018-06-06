@@ -48,7 +48,7 @@ public abstract class Message {
         } else {
             this.token = token;
         }
-        if (!testMessage(message)){
+        if (!testMessage(message, this.token)){
             valid = false;
         } else {
             byte[] worker = new byte[4];
@@ -70,13 +70,8 @@ public abstract class Message {
             if (message.length > 0x20){
                 byte[] payload = new byte[message.length - 0x20];
                 System.arraycopy(message, 0x20, payload,0, payload.length);
-                payload = this.token.decrypt(payload);
-                if (payload != null){
-                    Charset charset = Charset.forName("ISO-8859-1");
-                    int i;
-                    //noinspection StatementWithEmptyBody
-                    for (i = 0; i < payload.length && payload[i] != 0; i++) { }
-                    String pl = new String(payload, 0, i, charset);
+                String pl = decryptPayload(payload, this.token);
+                if (pl != null){
                     JSONObject ob = new JSONObject(pl);
                     this.payloadID = ob.optLong("id");
                 }
@@ -85,7 +80,8 @@ public abstract class Message {
         }
     }
 
-    boolean testMessage(byte[] message) {
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean testMessage(byte[] message, Token tk) {
         if (message == null) {
             return false;
         } else {
@@ -108,7 +104,7 @@ public abstract class Message {
                         if (ukHeader != HELLO_UNKNOWN && message.length != 0x20) {
                             byte[] md5 = new byte[16];
                             System.arraycopy(message, 16, md5, 0, 16);
-                            System.arraycopy(token.getToken(), 0, message, 16, 16);
+                            System.arraycopy(tk.getToken(), 0, message, 16, 16);
                             MessageDigest md;
                             try {
                                 md = MessageDigest.getInstance("MD5");
@@ -124,6 +120,18 @@ public abstract class Message {
                 }
             }
         }
+    }
+
+    public static String decryptPayload(byte[] payload, Token tk){
+        payload = tk.decrypt(payload);
+        if (payload != null){
+            Charset charset = Charset.forName("ISO-8859-1");
+            int i;
+            //noinspection StatementWithEmptyBody
+            for (i = 0; i < payload.length && payload[i] != 0; i++) { }
+            return new String(payload, 0, i, charset);
+        }
+        return null;
     }
 
     public Token getToken() {
