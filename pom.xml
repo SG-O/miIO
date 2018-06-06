@@ -22,11 +22,44 @@
 
     <groupId>de.sg-o.app</groupId>
     <artifactId>miio</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.1-SNAPSHOT</version>
 
     <name>miIO</name>
     <description>A miIO implementation.</description>
     <url>https://www.sg-o.de</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>sg-o</id>
+            <name>Joerg Bayer</name>
+            <email>admin@sg-o.de</email>
+            <url>https://www.sg-o.de</url>
+            <roles>
+                <role>lead</role>
+                <role>developer</role>
+                <role>debugger</role>
+                <role>reviewer</role>
+                <role>support</role>
+                <role>maintainer</role>
+            </roles>
+            <timezone>Europe/Berlin</timezone>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/SG-O/miIO.git</connection>
+        <developerConnection>scm:git:https://git.sg-o.de/root/miio.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/SG-O/miIO</url>
+    </scm>
 
     <build>
         <plugins>
