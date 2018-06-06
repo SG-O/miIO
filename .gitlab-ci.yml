@@ -1,12 +1,17 @@
 before_script:
   - javac -version
 
+stages:
+  - test
+  - deploy
+
 maven_test:
   stage: test
   script:
     - "mvn test"
     - "cat target/site/jacoco/index.html"
   artifacts:
+    expire_in: 1 week
     paths:
       - target/site/jacoco/
 
@@ -23,3 +28,14 @@ coverage:
     - git push origin master
   only:
     - master
+
+maven_deploy:
+  stage: deploy
+  script:
+    - "mvn deploy"
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - target/*.jar
+      - target/*.asc
+      - target/*.pom
