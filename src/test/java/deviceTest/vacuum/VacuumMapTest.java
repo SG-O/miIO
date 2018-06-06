@@ -69,11 +69,33 @@ public class VacuumMapTest {
     }
 
     @Test
+    public void mapPointScaleTest() {
+        Point p0 = new Point(200, 400);
+        int[] b0 = m0.mapPointScale(p0);
+        int[] b1 = m1.mapPointScale(p0);
+        int[] b2 = m2.mapPointScale(p0);
+        int[] b3 = m0.mapPointScale(null);
+
+        assertEquals(50, b0[0]);
+        assertEquals(100, b0[1]);
+
+        assertEquals(200, b1[0]);
+        assertEquals(400, b1[1]);
+
+        assertEquals(100, b2[0]);
+        assertEquals(200, b2[1]);
+
+        assertEquals(0, b3[0]);
+        assertEquals(0, b3[1]);
+    }
+
+    @Test
     public void mapRectangleScaleTest() {
         Rectangle r0 = new Rectangle(200, 400, 20, 40);
         int[] b0 = m0.mapRectangleScale(r0);
         int[] b1 = m1.mapRectangleScale(r0);
         int[] b2 = m2.mapRectangleScale(r0);
+        int[] b3 = m0.mapRectangleScale(null);
 
         assertEquals(50, b0[0]);
         assertEquals(100, b0[1]);
@@ -89,6 +111,11 @@ public class VacuumMapTest {
         assertEquals(200, b2[1]);
         assertEquals(110, b2[2]);
         assertEquals(220, b2[3]);
+
+        assertEquals(0, b3[0]);
+        assertEquals(0, b3[1]);
+        assertEquals(0, b3[2]);
+        assertEquals(0, b3[3]);
     }
 
     @Test

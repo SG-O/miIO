@@ -127,11 +127,25 @@ public class VacuumMap implements Serializable {
     }
 
     /**
+     * Get coordinates from a point in this map. It can be used to define the point the vacuum should move to.
+     * @param p The point to convert.
+     * @return An array of coordinates (x, y).
+     */
+    public int[] mapPointScale(Point p) {
+        if (p == null) p = new Point(0,0);
+        int[] scaled = new int[2];
+        scaled[0] = p.x / overSample;
+        scaled[1] = p.y / overSample;
+        return scaled;
+    }
+
+    /**
      * Get coordinates from a rectangle in this map. They can be used to define the area of the area cleanup.
      * @param rec The rectangle to convert.
      * @return An array of coordinates (x0, y0, x1, y1).
      */
     public int[] mapRectangleScale(Rectangle rec) {
+        if (rec == null) rec = new Rectangle(0,0,0,0);
         int[] scaled = new int[4];
         scaled[0] = rec.x / overSample;
         scaled[1] = rec.y / overSample;
