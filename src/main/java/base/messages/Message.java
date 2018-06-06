@@ -123,6 +123,7 @@ public abstract class Message {
     }
 
     public static String decryptPayload(byte[] payload, Token tk){
+        if (tk == null) return null;
         payload = tk.decrypt(payload);
         if (payload != null){
             Charset charset = Charset.forName("ISO-8859-1");

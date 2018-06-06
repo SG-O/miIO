@@ -118,4 +118,10 @@ public class CommandTest {
         assertFalse(msg7.isValid());
         assertFalse(msg8.isValid());
     }
+
+    @Test
+    public void messageDecryptTest() {
+        assertNull(Command.decryptPayload(new byte[]{0, 1}, null));
+        assertNull(Command.decryptPayload(null, new Token("000102030405060708090A0B0C0D0E0F", 16)));
+    }
 }
