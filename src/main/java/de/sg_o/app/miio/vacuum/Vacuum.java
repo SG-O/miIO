@@ -23,10 +23,12 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.awt.*;
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.ZoneId;
 
-public class Vacuum extends Device {
+public class Vacuum extends Device implements Serializable {
+    private static final long serialVersionUID = -1408835747852889939L;
     private  int manualControlSequence = -1;
 
     /**

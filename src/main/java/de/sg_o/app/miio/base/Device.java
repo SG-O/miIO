@@ -23,6 +23,9 @@ import org.json.JSONObject;
 import de.sg_o.app.miio.util.ByteArray;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -30,17 +33,17 @@ import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class Device {
-
+public class Device implements Serializable {
     private static final int PORT = 54321;
-    private byte[] rcv = new byte[65507];
+    private static final long serialVersionUID = -924264471464948810L;
+    private static byte[] rcv = new byte[65507];
 
     private InetAddress ip;
     private Token token;
     private int retries;
     private String[] acceptableModels;
 
-    private DatagramSocket socket;
+    private transient DatagramSocket socket;
 
     private int deviceID = -1;
     private int timeStamp = -1;
@@ -455,5 +458,16 @@ public class Device {
         JSONObject in = info();
         if (in == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         return in.optString("fw_ver");
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.writeInt(socket.getSoTimeout());
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        socket = new DatagramSocket();
+        socket.setSoTimeout(in.readInt());
     }
 }

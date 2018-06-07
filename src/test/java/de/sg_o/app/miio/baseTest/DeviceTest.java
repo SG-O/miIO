@@ -324,4 +324,64 @@ public class DeviceTest {
         }
         assertFalse(d0.discover());
     }
+
+    @Test
+    public void serialisationTest() throws Exception {
+        Server ts0 = new Server(null,12345678,null, null, null,null, null, 10000, null);
+        ServerGenericEvents ev = new ServerGenericEvents();
+        ts0.registerOnServerEventListener(ev);
+        ts0.start();
+
+        Device d0 = new Device(InetAddress.getByName("127.0.0.1"), ts0.getTk(), null, 0, 2);
+        assertEquals(ts0.getMacAddress(), d0.info().optString("mac"));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(d0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        Device serial0 = (Device) ois.readObject();
+        ois.close();
+        in.close();
+
+        assertEquals(ts0.getMacAddress(), serial0.info().optString("mac"));
+
+        ts0.terminate();
+
+        ServerVacuumEvents evCleaner = new ServerVacuumEvents();
+        Token tk = new Token("00112233445566778899AABBCCDDEEFF", 16);
+        Server ts1 = new Server(tk,ts0.getDeviceId() * 2,"rockrobo.vacuum.v1", "3.3.9_003194", ts0.getHardware(),ts0.getNetwork(), ts0.getMacAddress(), ts0.getLifeTime() * 2, ts0.getAccessPoint());
+        ts1.registerOnServerEventListener(ev);
+        ts1.registerOnServerEventListener(evCleaner);
+        ts1.start();
+        Vacuum d1 = new Vacuum(InetAddress.getByName("127.0.0.1"), tk, 0, 2);
+        assertEquals(60, d1.getFanSpeed());
+        assertTrue(d1.setFanSpeed(100));
+        assertEquals(100, d1.getFanSpeed());
+
+        out = new ByteArrayOutputStream();
+        oos = new ObjectOutputStream(out);
+        oos.writeObject(d1);
+        oos.flush();
+        out.flush();
+        serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        in = new ByteArrayInputStream(serialized);
+        ois = new ObjectInputStream(in);
+        Vacuum serial1 = (Vacuum) ois.readObject();
+        ois.close();
+        in.close();
+
+        assertEquals(100, serial1.getFanSpeed());
+        assertTrue(d1.setFanSpeed(60));
+        assertEquals(60, d1.getFanSpeed());
+
+        ts1.terminate();
+    }
 }
