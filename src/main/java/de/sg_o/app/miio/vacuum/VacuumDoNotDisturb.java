@@ -19,11 +19,14 @@ package de.sg_o.app.miio.vacuum;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.time.LocalTime;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class VacuumDoNotDisturb {
+public class VacuumDoNotDisturb implements Serializable {
+    private static final long serialVersionUID = -3037903760872324136L;
+
     private LocalTime start;
     private LocalTime end;
     private boolean enabled;

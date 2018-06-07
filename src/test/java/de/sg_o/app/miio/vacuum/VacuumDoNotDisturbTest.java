@@ -18,6 +18,7 @@ package de.sg_o.app.miio.vacuum;
 
 import org.junit.Test;
 
+import java.io.*;
 import java.time.LocalTime;
 
 import static org.junit.Assert.*;
@@ -93,5 +94,23 @@ public class VacuumDoNotDisturbTest {
         assertEquals("VacuumDoNotDisturb{start=15:30, end=21:30, enabled=true}", d0.toString());
         assertEquals("VacuumDoNotDisturb{start=22:00, end=08:00, enabled=true}", d1.toString());
         assertEquals("VacuumDoNotDisturb{start=22:00, end=08:00, enabled=false}", d3.toString());
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(d0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        VacuumDoNotDisturb serial = (VacuumDoNotDisturb) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(d0, serial);
     }
 }
