@@ -19,6 +19,8 @@ package de.sg_o.app.miio.vacuum;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.io.*;
+
 import static org.junit.Assert.*;
 
 public class VacuumStatusTest {
@@ -181,5 +183,23 @@ public class VacuumStatusTest {
         assertEquals("VacuumStatus{dndEnabled=true, mapPresent=true, cleanArea=10000, fanPower=60, msgVersion=8, inCleaning=false, errorCode=NONE, state=IDLE, battery=100, msgSeq=23, cleanTime=0}", s0.toString());
         assertEquals("VacuumStatus{dndEnabled=true, mapPresent=true, cleanArea=540000, fanPower=60, msgVersion=8, inCleaning=false, errorCode=NONE, state=CHARGING, battery=100, msgSeq=23, cleanTime=0}", s1.toString());
         assertEquals("VacuumStatus{dndEnabled=false, mapPresent=false, cleanArea=0, fanPower=60, msgVersion=8, inCleaning=false, errorCode=UNKNOWN, state=UNKNOWN, battery=100, msgSeq=0, cleanTime=0}", s2.toString());
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(s0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        VacuumStatus serial = (VacuumStatus) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(s0, serial);
     }
 }

@@ -18,12 +18,15 @@ package de.sg_o.app.miio.vacuum;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class VacuumStatus {
+public class VacuumStatus implements Serializable {
+    private static final long serialVersionUID = 7121689240387054887L;
+
     public enum State {
         UNKNOWN(0),
         STARTUP(1),
