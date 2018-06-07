@@ -20,6 +20,7 @@ import de.sg_o.app.miio.base.Token;
 import de.sg_o.app.miio.util.ByteArray;
 import org.junit.Test;
 
+import java.io.*;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
@@ -117,5 +118,23 @@ public class TokenTest {
         assertNotNull(tk0.encrypt(msgEmpty));
         assertNull(tk0.encrypt(null));
         assertNull(tk0.decrypt(null));
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(tk0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        Token serial = (Token) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(tk0, serial);
     }
 }

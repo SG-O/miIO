@@ -21,14 +21,16 @@ import de.sg_o.app.miio.util.ByteArray;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 @SuppressWarnings("WeakerAccess")
-public class Token {
+public class Token implements Serializable {
     private static final String ENCRYPTION_ALGORITHM = "AES";
     private static final String ENCRYPTION_ALGORITHM_IMPLEMENTATION = "AES/CBC/PKCS5Padding";
+    private static final long serialVersionUID = 7363678090013298202L;
 
     private byte[] token;
 
