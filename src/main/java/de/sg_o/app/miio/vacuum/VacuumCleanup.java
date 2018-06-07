@@ -18,11 +18,13 @@ package de.sg_o.app.miio.vacuum;
 
 import org.json.JSONArray;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class VacuumCleanup {
+public class VacuumCleanup implements Serializable {
+    private static final long serialVersionUID = -4764098548055264774L;
     private Instant start;
     private Instant end;
     private long runtime;

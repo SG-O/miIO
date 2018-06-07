@@ -19,6 +19,7 @@ package de.sg_o.app.miio.vacuum;
 import org.json.JSONArray;
 import org.junit.Test;
 
+import java.io.*;
 import java.time.Instant;
 
 import static org.junit.Assert.*;
@@ -114,5 +115,23 @@ public class VacuumCleanupTest {
     @Test
     public void toStringTest() {
         assertEquals("VacuumCleanup{start=2018-05-28T22:27:28Z, end=2018-05-28T22:30:29Z, runtime=181, area=1970000, completed=true}", c4.toString());
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(c0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        VacuumCleanup serial = (VacuumCleanup) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(c0, serial);
     }
 }
