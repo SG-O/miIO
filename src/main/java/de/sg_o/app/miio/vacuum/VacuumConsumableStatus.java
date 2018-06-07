@@ -18,10 +18,13 @@ package de.sg_o.app.miio.vacuum;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class VacuumConsumableStatus {
+public class VacuumConsumableStatus implements Serializable {
+    private static final long serialVersionUID = 8580701665863054538L;
+
     public enum Names {
         MAIN_BRUSH("main_brush_work_time"),
         SIDE_BRUSH("side_brush_work_time"),

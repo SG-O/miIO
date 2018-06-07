@@ -19,6 +19,8 @@ package de.sg_o.app.miio.vacuum;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.io.*;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -155,5 +157,23 @@ public class VacuumConsumableStatusTest {
         assertEquals("VacuumConsumableStatus{mainBrushWorkTime=540000, sensorTimeSinceCleaning=72000, sideBrushWorkTime=180000, filterWorkTime=180000}", s0.toString());
         assertEquals("VacuumConsumableStatus{mainBrushWorkTime=13980, sensorTimeSinceCleaning=13980, sideBrushWorkTime=13980, filterWorkTime=13980}", s1.toString());
         assertEquals("VacuumConsumableStatus{mainBrushWorkTime=0, sensorTimeSinceCleaning=0, sideBrushWorkTime=0, filterWorkTime=0}", s2.toString());
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(s0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        VacuumConsumableStatus serial = (VacuumConsumableStatus) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(s0, serial);
     }
 }
