@@ -21,16 +21,16 @@ import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
 public class VacuumTimerTest {
     private LocalTime tm = LocalTime.of(10,0);
-    private Set<DayOfWeek> d =  new HashSet<>();
+    private HashSet<DayOfWeek> d =  new HashSet<>();
     private JSONArray empty = new JSONArray();
     private VacuumTimer t0;
     private VacuumTimer t1;
@@ -67,7 +67,7 @@ public class VacuumTimerTest {
         assertEquals(t2.getTime(), t6.getTime());
         assertNull(t2.getJob());
 
-        Set<DayOfWeek> dSingle =  new HashSet<>();
+        HashSet<DayOfWeek> dSingle =  new HashSet<>();
         dSingle.add(DayOfWeek.SUNDAY);
         VacuumTimer t7 = new VacuumTimer("1234", true, tm, dSingle, empty);
         VacuumTimer t8 = new VacuumTimer(t7.construct(true));
@@ -197,11 +197,31 @@ public class VacuumTimerTest {
 
     @Test
     public void toStringTest() {
-        Set<DayOfWeek> dSingle =  new HashSet<>();
+        HashSet<DayOfWeek> dSingle =  new HashSet<>();
         dSingle.add(DayOfWeek.SUNDAY);
         VacuumTimer t5 = new VacuumTimer("1234", true, tm, dSingle, empty);
         VacuumTimer t6 = new VacuumTimer("1234", true, tm, null, empty);
         assertEquals("VacuumTimer{ID='1234', enabled=true, time=10:00, runDays=[SUNDAY], job=[\"\",\"\"]}", t5.toString());
         assertEquals("VacuumTimer{ID='1234', enabled=true, time=10:00, runDays=[], job=[\"\",\"\"]}", t6.toString());
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(t0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        VacuumTimer serial = (VacuumTimer) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(t0, serial);
+        assertEquals(t0.getJob().length(), serial.getJob().length());
+        assertEquals(t0.getJob().toString(), serial.getJob().toString());
     }
 }

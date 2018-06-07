@@ -19,6 +19,10 @@ package de.sg_o.app.miio.vacuum;
 import de.sg_o.app.miio.base.CommandExecutionException;
 import org.json.JSONArray;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
@@ -26,12 +30,14 @@ import java.util.Objects;
 import java.util.Set;
 
 @SuppressWarnings("WeakerAccess")
-public class VacuumTimer {
+public class VacuumTimer implements Serializable {
+    private static final long serialVersionUID = 4679120578276423163L;
+
     private String ID;
     private boolean enabled;
     private LocalTime time;
-    private Set<DayOfWeek> runDays;
-    private JSONArray job;
+    private HashSet<DayOfWeek> runDays;
+    private transient JSONArray job;
 
     /**
      * Create a new vacuum timer object.
@@ -41,7 +47,7 @@ public class VacuumTimer {
      * @param runDays The days to run the job at. If null or an empty set, it will be run every day.
      * @param job The job description.
      */
-    public VacuumTimer(String ID, boolean enabled, LocalTime time, Set<DayOfWeek> runDays, JSONArray job) {
+    public VacuumTimer(String ID, boolean enabled, LocalTime time, HashSet<DayOfWeek> runDays, JSONArray job) {
         if (ID == null) ID = Long.valueOf(System.currentTimeMillis()).toString();
         this.ID = ID;
         this.enabled = enabled;
@@ -59,7 +65,7 @@ public class VacuumTimer {
      * @param minute The minute to start the job at.
      * @param runDays The days to run the job at. If null or an empty set, it will be run every day.
      */
-    public VacuumTimer(String ID, boolean enabled, int hour, int minute, Set<DayOfWeek> runDays) {
+    public VacuumTimer(String ID, boolean enabled, int hour, int minute, HashSet<DayOfWeek> runDays) {
         if (ID == null) ID = Long.valueOf(System.currentTimeMillis()).toString();
         this.ID = ID;
         this.enabled = enabled;
@@ -240,6 +246,9 @@ public class VacuumTimer {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VacuumTimer that = (VacuumTimer) o;
+        for (DayOfWeek d : runDays){
+            if (!that.runDays.contains(d)) return false;
+        }
         return enabled == that.enabled &&
                 Objects.equals(ID, that.ID);
     }
@@ -258,5 +267,15 @@ public class VacuumTimer {
                 ", runDays=" + runDays +
                 ", job=" + job +
                 '}';
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+        out.writeObject(job.toString());
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        in.defaultReadObject();
+        job = new JSONArray((String) in.readObject());
     }
 }
