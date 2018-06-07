@@ -19,21 +19,23 @@ package de.sg_o.app.miio.baseTest;
 import de.sg_o.app.miio.base.CommandExecutionException;
 import de.sg_o.app.miio.base.Device;
 import de.sg_o.app.miio.base.Token;
-import de.sg_o.app.miio.vacuum.*;
-import org.json.JSONObject;
-import org.junit.Test;
 import de.sg_o.app.miio.server.Server;
 import de.sg_o.app.miio.serverTest.ServerGenericEvents;
 import de.sg_o.app.miio.serverTest.ServerVacuumEvents;
+import de.sg_o.app.miio.vacuum.*;
+import org.json.JSONObject;
+import org.junit.Test;
 
 import java.awt.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.time.LocalTime;
 import java.time.ZoneId;
 
-import static de.sg_o.app.miio.base.CommandExecutionException.Error.DEVICE_NOT_FOUND;
-import static de.sg_o.app.miio.base.CommandExecutionException.Error.INVALID_PARAMETERS;
-import static de.sg_o.app.miio.base.CommandExecutionException.Error.UNKNOWN_METHOD;
+import static de.sg_o.app.miio.base.CommandExecutionException.Error.*;
 import static org.junit.Assert.*;
 
 public class DeviceTest {
