@@ -19,6 +19,8 @@ package de.sg_o.app.miio.vacuum;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.io.*;
+
 import static org.junit.Assert.*;
 
 public class VacuumSounpackInstallStateTest {
@@ -140,5 +142,23 @@ public class VacuumSounpackInstallStateTest {
         assertEquals("VacuumSounpackInstallState{progress=30, state=UNKNOWN, error=NONE, sid=2}", s0.toString());
         assertEquals("VacuumSounpackInstallState{progress=30, state=UNKNOWN, error=NONE, sid=2}", s0.toString());
         assertEquals("VacuumSounpackInstallState{progress=30, state=UNKNOWN, error=NONE, sid=2}", s0.toString());
+    }
+
+    @Test
+    public void serialisationTest() throws IOException, ClassNotFoundException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(out);
+        oos.writeObject(s0);
+        oos.flush();
+        out.flush();
+        byte[] serialized = out.toByteArray();
+        oos.close();
+        out.close();
+        ByteArrayInputStream in = new ByteArrayInputStream(serialized);
+        ObjectInputStream ois = new ObjectInputStream(in);
+        VacuumSounpackInstallState serial = (VacuumSounpackInstallState) ois.readObject();
+        ois.close();
+        in.close();
+        assertEquals(s0, serial);
     }
 }

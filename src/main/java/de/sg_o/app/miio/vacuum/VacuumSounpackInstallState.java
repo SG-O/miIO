@@ -18,12 +18,15 @@ package de.sg_o.app.miio.vacuum;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
-public class VacuumSounpackInstallState {
+public class VacuumSounpackInstallState implements Serializable {
+    private static final long serialVersionUID = -2391464429205045105L;
+
     public enum State {
         UNKNOWN(0),
         DOWNLOAD(1),
