@@ -33,8 +33,8 @@ public class VacuumMapTest {
     @Before
     public void setUp() throws Exception {
         ClassLoader classLoader = getClass().getClassLoader();
-        File fileMap = new File(Objects.requireNonNull(classLoader.getResource("navmap0.ppm")).getFile());
-        File fileSlam = new File(Objects.requireNonNull(classLoader.getResource("SLAM_fprintf.log")).getFile());
+        File fileMap = new File(Objects.requireNonNull(classLoader.getResource("run/shm/navmap0.ppm")).getFile());
+        File fileSlam = new File(Objects.requireNonNull(classLoader.getResource("run/shm/SLAM_fprintf.log")).getFile());
         File fileBadSlam = new File(Objects.requireNonNull(classLoader.getResource("SLAM_fprintf_bad.log")).getFile());
 
         BufferedReader map = new BufferedReader(new FileReader(fileMap));
@@ -81,6 +81,39 @@ public class VacuumMapTest {
         assertEquals(123, m1.getBoundingBox().width);
         assertEquals(2048, m2.getBoundingBox().height);
         assertEquals(2048, m2.getBoundingBox().width);
+    }
+
+    @Test
+    public void getOverSampleTest() {
+        assertEquals(4, m0.getOverSample());
+        assertEquals(1, m1.getOverSample());
+        assertEquals(2, m2.getOverSample());
+
+        assertEquals("Point2D.Float[2048.0, 2048.0]", m0.getPath().get(0).toString());
+        assertEquals(-131587, m0.getMap().getRGB(2047, 2047));
+        assertEquals(644, m0.getBoundingBox().height);
+        assertEquals(492, m0.getBoundingBox().width);
+        assertEquals(644, m0.getMapWithPathInBounds().getHeight());
+        assertEquals(492, m0.getMapWithPathInBounds().getWidth());
+        assertEquals(-16776961, m0.getMapWithPath().getRGB(2048, 2048));
+        m0.setOverSample(2);
+        assertEquals("Point2D.Float[1024.0, 1024.0]", m0.getPath().get(0).toString());
+        assertNotEquals(-131587, m0.getMap().getRGB(2047, 2047));
+        assertEquals(-131587, m0.getMap().getRGB(1023, 1023));
+        assertEquals(322, m0.getBoundingBox().height);
+        assertEquals(246, m0.getBoundingBox().width);
+        assertEquals(322, m0.getMapWithPathInBounds().getHeight());
+        assertEquals(246, m0.getMapWithPathInBounds().getWidth());
+        assertEquals(-16776961, m0.getMapWithPath().getRGB(1024, 1024));
+        m0.setOverSample(-1);
+        assertEquals("Point2D.Float[512.0, 512.0]", m0.getPath().get(0).toString());
+        assertEquals(-131587, m0.getMap().getRGB(512, 512));
+        assertEquals(161, m0.getBoundingBox().height);
+        assertEquals(123, m0.getBoundingBox().width);
+        assertEquals(161, m0.getMapWithPathInBounds().getHeight());
+        assertEquals(123, m0.getMapWithPathInBounds().getWidth());
+        assertEquals(-16776961, m0.getMapWithPath().getRGB(512, 512));
+
     }
 
     @Test
@@ -182,8 +215,8 @@ public class VacuumMapTest {
     @Test
     public void equalsTest() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        File fileMap = new File(Objects.requireNonNull(classLoader.getResource("navmap0.ppm")).getFile());
-        File fileSlam = new File(Objects.requireNonNull(classLoader.getResource("SLAM_fprintf.log")).getFile());
+        File fileMap = new File(Objects.requireNonNull(classLoader.getResource("run/shm/navmap0.ppm")).getFile());
+        File fileSlam = new File(Objects.requireNonNull(classLoader.getResource("run/shm/SLAM_fprintf.log")).getFile());
 
         BufferedReader map = new BufferedReader(new FileReader(fileMap));
         BufferedReader slam = new BufferedReader(new FileReader(fileSlam));
@@ -209,8 +242,8 @@ public class VacuumMapTest {
     @Test
     public void hashCodeTest() throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        File fileMap = new File(Objects.requireNonNull(classLoader.getResource("navmap0.ppm")).getFile());
-        File fileSlam = new File(Objects.requireNonNull(classLoader.getResource("SLAM_fprintf.log")).getFile());
+        File fileMap = new File(Objects.requireNonNull(classLoader.getResource("run/shm/navmap0.ppm")).getFile());
+        File fileSlam = new File(Objects.requireNonNull(classLoader.getResource("run/shm/SLAM_fprintf.log")).getFile());
 
         BufferedReader map = new BufferedReader(new FileReader(fileMap));
         BufferedReader slam = new BufferedReader(new FileReader(fileSlam));
