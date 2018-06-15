@@ -90,7 +90,6 @@ public class VacuumMapTest {
         assertEquals(2, m2.getOverSample());
 
         assertEquals("Point2D.Float[2048.0, 2048.0]", m0.getPath().get(0).toString());
-        assertEquals(-131587, m0.getMap().getRGB(2047, 2047));
         assertEquals(644, m0.getBoundingBox().height);
         assertEquals(492, m0.getBoundingBox().width);
         assertEquals(644, m0.getMapWithPathInBounds().getHeight());
@@ -98,8 +97,6 @@ public class VacuumMapTest {
         assertEquals(-16776961, m0.getMapWithPath().getRGB(2048, 2048));
         m0.setOverSample(2);
         assertEquals("Point2D.Float[1024.0, 1024.0]", m0.getPath().get(0).toString());
-        assertNotEquals(-131587, m0.getMap().getRGB(2047, 2047));
-        assertEquals(-131587, m0.getMap().getRGB(1023, 1023));
         assertEquals(322, m0.getBoundingBox().height);
         assertEquals(246, m0.getBoundingBox().width);
         assertEquals(322, m0.getMapWithPathInBounds().getHeight());
@@ -107,7 +104,6 @@ public class VacuumMapTest {
         assertEquals(-16776961, m0.getMapWithPath().getRGB(1024, 1024));
         m0.setOverSample(-1);
         assertEquals("Point2D.Float[512.0, 512.0]", m0.getPath().get(0).toString());
-        assertEquals(-131587, m0.getMap().getRGB(512, 512));
         assertEquals(161, m0.getBoundingBox().height);
         assertEquals(123, m0.getBoundingBox().width);
         assertEquals(161, m0.getMapWithPathInBounds().getHeight());

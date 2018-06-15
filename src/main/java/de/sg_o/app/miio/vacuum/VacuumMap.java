@@ -121,7 +121,7 @@ public class VacuumMap implements Serializable {
     /**
      * @return The complete map.
      */
-    public BufferedImage getMap() {
+    public synchronized BufferedImage getMap() {
         BufferedImage outMap = new BufferedImage(1024 * overSample, 1024 * overSample, BufferedImage.TYPE_3BYTE_BGR);
         AffineTransform at = new AffineTransform();
         at.scale(overSample, overSample);
@@ -133,7 +133,7 @@ public class VacuumMap implements Serializable {
     /**
      * @return The path the vacuum took.
      */
-    public List<Point2D.Float> getPath() {
+    public synchronized List<Point2D.Float> getPath() {
         List<Point2D.Float> outPath = new LinkedList<>();
         for (Point2D.Float p : path){
             outPath.add(new Point2D.Float((p.x + (map.getWidth() / 2.0f)) * overSample, (p.y + (map.getHeight() / 2.0f)) * overSample));
@@ -144,7 +144,7 @@ public class VacuumMap implements Serializable {
     /**
      * @return The bounding box of the active map area.
      */
-    public Rectangle getBoundingBox() {
+    public synchronized Rectangle getBoundingBox() {
         Rectangle tmp = new Rectangle();
         tmp.x = boundingBox.x * overSample;
         tmp.y = boundingBox.y * overSample;
@@ -153,11 +153,11 @@ public class VacuumMap implements Serializable {
         return tmp;
     }
 
-    public int getOverSample() {
+    public synchronized int getOverSample() {
         return overSample;
     }
 
-    public void setOverSample(int overSample) {
+    public synchronized void setOverSample(int overSample) {
         if (overSample < 1) overSample = 1;
         this.overSample = overSample;
     }
@@ -167,7 +167,7 @@ public class VacuumMap implements Serializable {
      * @param p The point to convert.
      * @return An array of coordinates (x, y).
      */
-    public int[] mapPointScale(Point p) {
+    public synchronized int[] mapPointScale(Point p) {
         if (p == null) p = new Point(0,0);
         int[] scaled = new int[2];
         scaled[0] = p.x / overSample;
@@ -180,7 +180,7 @@ public class VacuumMap implements Serializable {
      * @param rec The rectangle to convert.
      * @return An array of coordinates (x0, y0, x1, y1).
      */
-    public int[] mapRectangleScale(Rectangle rec) {
+    public synchronized int[] mapRectangleScale(Rectangle rec) {
         if (rec == null) rec = new Rectangle(0,0,0,0);
         int[] scaled = new int[4];
         scaled[0] = rec.x / overSample;
@@ -220,7 +220,7 @@ public class VacuumMap implements Serializable {
      * @param startColor The color the start point should be drawn with. If null is provided this will fall back to green.
      * @param pathColor The color the path should be drawn with. If null is provided this will fall back to blue.
      */
-    public BufferedImage getMapWithPath(Color startColor, Color pathColor) {
+    public synchronized BufferedImage getMapWithPath(Color startColor, Color pathColor) {
         if (startColor == null) startColor = Color.GREEN;
         if (pathColor == null) pathColor = Color.BLUE;
         BufferedImage pathMap = new BufferedImage(1024 * overSample, 1024 * overSample, BufferedImage.TYPE_3BYTE_BGR);
@@ -261,25 +261,30 @@ public class VacuumMap implements Serializable {
                 if (map.getRGB(i, j) != vacuumMap.map.getRGB(i, j)) return false;
             }
         }
-        return overSample == vacuumMap.overSample &&
-                Objects.equals(path, vacuumMap.path) &&
-                Objects.equals(boundingBox, vacuumMap.boundingBox);
+        synchronized(this) {
+            return overSample == vacuumMap.overSample &&
+                    Objects.equals(path, vacuumMap.path) &&
+                    Objects.equals(boundingBox, vacuumMap.boundingBox);
+        }
     }
 
     @Override
     public int hashCode() {
-
-        return Objects.hash(map.getHeight(), map. getWidth(), path, boundingBox, overSample);
+        synchronized(this) {
+            return Objects.hash(map.getHeight(), map.getWidth(), path, boundingBox, overSample);
+        }
     }
 
     @Override
     public String toString() {
-        return "VacuumMap{" +
-                "map=width:" + map.getWidth() * overSample + "; height:" + map.getHeight() * overSample +
-                ", pathEntries=" + path.size() +
-                ", boundingBox=" + getBoundingBox() +
-                ", overSample=" + overSample +
-                '}';
+        synchronized(this) {
+            return "VacuumMap{" +
+                    "map=width:" + map.getWidth() * overSample + "; height:" + map.getHeight() * overSample +
+                    ", pathEntries=" + path.size() +
+                    ", boundingBox=" + getBoundingBox() +
+                    ", overSample=" + overSample +
+                    '}';
+        }
     }
 
     private byte[] mapToBytes() throws IOException {
@@ -295,7 +300,7 @@ public class VacuumMap implements Serializable {
         ByteArrayInputStream bais = new ByteArrayInputStream(source);
         this.map = ImageIO.read(bais);
         if (this.map == null) {
-            this.map = new BufferedImage(1024 * overSample, 1024 * overSample, BufferedImage.TYPE_3BYTE_BGR);
+            this.map = new BufferedImage(1024, 1024, BufferedImage.TYPE_3BYTE_BGR);
         }
     }
 
