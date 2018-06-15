@@ -83,10 +83,10 @@ public class Command extends Message {
             }
             if (params.getClass() == JSONArray.class) {
                 JSONArray paramsObj = (JSONArray) params;
-                if (paramsObj.length() > 0) {
-                    out.put("params", paramsObj);
-                }
+                out.put("params", paramsObj);
             }
+        } else {
+            out.put("params", new JSONArray());
         }
         return out.toString();
     }

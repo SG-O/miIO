@@ -49,6 +49,11 @@ public class DeviceTest {
         ts0.start();
 
         Device d0 = new Device(InetAddress.getByName("127.0.0.1"), ts0.getTk(), null, 0, 2);
+        assertEquals("127.0.0.1", d0.getIp().getHostAddress());
+        assertEquals(ts0.getTk(), d0.getToken());
+        assertNull(d0.getAcceptableModels());
+        assertEquals(2, d0.getRetries());
+        assertEquals(1000, d0.getTimeout());
         assertEquals(ts0.getMacAddress(), d0.info().optString("mac"));
         assertEquals("{\"result\":\"unknown_method\",\"id\":0}", d0.send("{\"method\":\"get_status\",\"id\":0}"));
         assertEquals(ts0.getModel(), d0.model());
@@ -232,7 +237,7 @@ public class DeviceTest {
             fail();
         } catch (CommandExecutionException e){
             assertEquals(DEVICE_NOT_FOUND.cause, e.getError().cause);
-            assertEquals("DEVICE_NOT_FOUND", e.toString());
+            assertEquals("DEVICE_NOT_FOUND: DEVICE_NOT_FOUND", e.toString());
         }
         try {
             d0.installSoundpack(null, "6cd9eb1aee36e091974f259ea81621fa", 5);

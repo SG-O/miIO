@@ -108,7 +108,7 @@ public class CommandTest {
 
         assertNull(msg0.getParams());
         assertNull(msg1.getParams());
-        assertNull(msg2.getParams());
+        assertEquals("[]", msg2.getParams().toString());
 
         assertEquals(ar.length(),((JSONArray)msg3.getParams()).length());
         assertEquals(ar.get(0),((JSONArray)msg3.getParams()).get(0));

@@ -77,7 +77,7 @@ public abstract class Message {
             System.arraycopy(message, 12, worker, 0, 4);
             this.timeStamp = (int) ByteArray.fromBytes(worker);
 
-            if (this.unknownHeader == HELLO_UNKNOWN){
+            if (this.unknownHeader == HELLO_UNKNOWN || message.length == 0x20){
                 worker = new byte[16];
                 System.arraycopy(message, 16, worker,0, 16);
                 this.token = new Token(worker);

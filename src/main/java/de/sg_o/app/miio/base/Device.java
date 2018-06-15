@@ -74,6 +74,45 @@ public class Device implements Serializable {
     }
 
     /**
+     * @return The IP address of the device.
+     */
+    public InetAddress getIp() {
+        return ip;
+    }
+
+    /**
+     * @return The token of the device.
+     */
+    public Token getToken() {
+        return token;
+    }
+
+    /**
+     * @return The number of retries when discovering a device or sending a command.
+     */
+    public int getRetries() {
+        return retries;
+    }
+
+    /**
+     * @return The model strings this device must have.
+     */
+    public String[] getAcceptableModels() {
+        return acceptableModels;
+    }
+
+    /**
+     * @return The timeout for the communication to fail.
+     */
+    public int getTimeout() {
+        try {
+            return socket.getSoTimeout();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    /**
      * Try to connect to a device or discover it.
      * @param broadcast The InetAddress to broadcast to if no ip was given
      * @return True if a device was found
@@ -108,11 +147,18 @@ public class Device implements Serializable {
         int length = (int)ByteArray.fromBytes(worker);
         worker = new byte[length];
         System.arraycopy(rcv, 0, worker, 0, length);
-        Response response = new Response(worker, null);
-        if (!response.getToken().equals(new Token("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",16))){
-            token = response.getToken();
-        } else if (token == null){
+        Response response;
+        try {
+            response = new Response(worker, null);
+        } catch (CommandExecutionException e) {
             return false;
+        }
+        if (token == null){
+            if (!(response.getToken().equals(new Token("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",16)) || response.getToken().equals(new Token("00000000000000000000000000000000",16)))) {
+                token = response.getToken();
+            } else {
+                return false;
+            }
         }
         if (!((response.getDeviceID() == -1) || (response.getTimeStamp() == -1))){
             deviceID = response.getDeviceID();

@@ -16,6 +16,7 @@
 
 package de.sg_o.app.miio.base.messages;
 
+import de.sg_o.app.miio.base.CommandExecutionException;
 import de.sg_o.app.miio.base.Token;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,7 +31,7 @@ public class Response extends Message{
         this.params = params;
     }
 
-    public Response(byte[] message, Token token) {
+    public Response(byte[] message, Token token) throws CommandExecutionException {
         super(message, token);
         if (super.isValid()){
             if (message.length > 0x20){
@@ -47,6 +48,11 @@ public class Response extends Message{
                     this.params = ob.optJSONObject("result");
                     if (this.params == null) this.params = ob.optJSONArray("result");
                     if (this.params == null) this.params = ob.optString("result", null);
+                    if (this.params == null) {
+                        JSONObject error = ob.optJSONObject("error");
+                        if (error == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+                        throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE, error.toString());
+                    }
                 }
             }
         }
