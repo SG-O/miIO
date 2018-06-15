@@ -22,7 +22,7 @@
 
     <groupId>de.sg-o.app</groupId>
     <artifactId>miio</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
 
     <name>miIO</name>
     <description>A miIO implementation.</description>
