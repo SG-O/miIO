@@ -26,7 +26,9 @@ public class CommandExecutionException extends Exception {
         EMPTY_RESPONSE(3),
         INVALID_RESPONSE(4),
         IP_OR_TOKEN_UNKNOWN(5),
-        INVALID_PARAMETERS(6);
+        INVALID_PARAMETERS(6),
+        NOT_IMPLEMENTED(7),
+        UNKNOWN(8);
         public final int cause;
 
         Error(int cause) {
@@ -35,10 +37,20 @@ public class CommandExecutionException extends Exception {
     }
 
     private Error error;
+    private String reason;
 
     @SuppressWarnings("WeakerAccess")
     public CommandExecutionException(Error error) {
+        if (error == null) error = Error.UNKNOWN;
         this.error = error;
+        this.reason = error.name();
+    }
+
+    public CommandExecutionException(Error error, String reason) {
+        if (error == null) error = Error.UNKNOWN;
+        this.error = error;
+        if (reason == null) reason = error.name();
+        this.reason = reason;
     }
 
     public Error getError() {
@@ -47,6 +59,6 @@ public class CommandExecutionException extends Exception {
 
     @Override
     public String toString() {
-        return error.name();
+        return error.name() + ": " + reason;
     }
 }
