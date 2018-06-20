@@ -44,7 +44,7 @@ public class VacuumStatus implements Serializable {
         SHUTDOWN(13),
         UPDATING(14),
         DOCKING(15),
-        HEADING_TARGET(16),
+        GOING_TO_TARGET(16),
         CLEANING_ZONE(17);
         private final int state;
         private static Map<Integer, State> map = new HashMap<>();
