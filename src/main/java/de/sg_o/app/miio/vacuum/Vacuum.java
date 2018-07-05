@@ -22,7 +22,6 @@ import de.sg_o.app.miio.base.Token;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.awt.*;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.time.ZoneId;
@@ -289,8 +288,7 @@ public class Vacuum extends Device implements Serializable {
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
     public boolean goTo(float x, float y) throws CommandExecutionException {
-        Point p = new Point();
-        p.setLocation(x * 1000d, y * 1000d);
+        int[] p = {(int)(x * 1000d), (int)(y * 1000d)};
         return goTo(p);
     }
 
@@ -300,11 +298,12 @@ public class Vacuum extends Device implements Serializable {
      * @return True if the command has been received correctly.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public boolean goTo(Point p) throws CommandExecutionException {
+    public boolean goTo(int[] p) throws CommandExecutionException {
         if (p == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+        if (p.length != 2) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray payload = new JSONArray();
-        payload.put(p.x);
-        payload.put(p.y);
+        payload.put(p[0]);
+        payload.put(p[1]);
         return sendOk("app_goto_target" , payload);
     }
 
@@ -348,10 +347,8 @@ public class Vacuum extends Device implements Serializable {
             y1 = t;
 
         }
-        Point p0 = new Point();
-        p0.setLocation(x0 * 1000d, y0 * 1000d);
-        Point p1 = new Point();
-        p1.setLocation(x1 * 1000d, y1 * 1000d);
+        int[] p0 = {(int)(x0 * 1000d), (int)(y0 * 1000d)};
+        int[] p1 = {(int)(x1 * 1000d), (int)(y1 * 1000d)};
         return cleanArea(p0, p1, passes);
     }
 
@@ -363,13 +360,15 @@ public class Vacuum extends Device implements Serializable {
      * @return True if the command has been received correctly.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public boolean cleanArea(Point bottomLeft, Point topRight, int passes) throws CommandExecutionException {
+    public boolean cleanArea(int[] bottomLeft, int[] topRight, int passes) throws CommandExecutionException {
         if (bottomLeft == null || topRight == null || passes < 1) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+        if (bottomLeft.length != 2) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+        if (topRight.length != 2) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray payload = new JSONArray();
-        payload.put(bottomLeft.x);
-        payload.put(bottomLeft.y);
-        payload.put(topRight.x);
-        payload.put(topRight.y);
+        payload.put(bottomLeft[0]);
+        payload.put(bottomLeft[1]);
+        payload.put(topRight[0]);
+        payload.put(topRight[1]);
         payload.put(passes);
         JSONArray wrapper = new JSONArray();
         wrapper.put(payload);

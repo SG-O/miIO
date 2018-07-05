@@ -21,7 +21,6 @@ import de.sg_o.app.miio.base.Device;
 import de.sg_o.app.miio.base.Token;
 import org.json.JSONArray;
 
-import java.awt.*;
 import java.net.InetAddress;
 import java.util.Map;
 
@@ -123,10 +122,9 @@ public abstract class Light extends Device {
      * @return True if the command was received successfully.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public boolean setRGB(Color c, boolean smoothChange, int duration) throws CommandExecutionException {
-        if (c == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
+    public boolean setRGB(int c, boolean smoothChange, int duration) throws CommandExecutionException {
         if (duration < 30) duration = 30;
-        int colorInt = c.getRGB() & 0xFFFFFF;
+        int colorInt = c & 0xFFFFFF;
         if (colorInt < 1) colorInt = 0x010101;
         JSONArray col = new JSONArray();
         col.put(colorInt);
@@ -139,8 +137,8 @@ public abstract class Light extends Device {
      * @return The current color the device is set to.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public Color getRGB() throws CommandExecutionException {
-            return new Color(getIntProp(Prop.Names.RGB_COLOR));
+    public int getRGB() throws CommandExecutionException {
+            return getIntProp(Prop.Names.RGB_COLOR);
     }
 
     /**

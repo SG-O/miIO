@@ -26,7 +26,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import java.awt.*;
 import java.net.InetAddress;
 
 public class ColorLightTest {
@@ -67,7 +66,7 @@ public class ColorLightTest {
     @Test
     public void modeTest() throws Exception {
         assertEquals(2, d0.getDeviceMode());
-        assertTrue(d0.setRGB(Color.ORANGE, false, 0));
+        assertTrue(d0.setRGB(0xFF0000, false, 0));
         assertEquals(1, d0.getDeviceMode());
         assertTrue(d0.setHSV(0, 100, false, 0));
         assertEquals(3, d0.getDeviceMode());
@@ -82,9 +81,9 @@ public class ColorLightTest {
 
     @Test
     public void rgbTest() throws Exception {
-        assertEquals(Color.red, d0.getRGB());
-        assertTrue(d0.setRGB(Color.ORANGE, false, 0));
-        assertEquals(Color.orange, d0.getRGB());
+        assertEquals(0xFF0000, d0.getRGB());
+        assertTrue(d0.setRGB(0x0000FF, false, 0));
+        assertEquals(0x0000FF, d0.getRGB());
     }
 
     @Test

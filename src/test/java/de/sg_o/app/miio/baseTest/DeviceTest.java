@@ -26,7 +26,6 @@ import de.sg_o.app.miio.vacuum.*;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -172,12 +171,12 @@ public class DeviceTest {
         assertTrue(d1.setDoNotDisturb(new VacuumDoNotDisturb(null, null)));
         assertEquals(new VacuumDoNotDisturb(null, null), d1.getDoNotDisturb());
 
-        assertTrue(d1.goTo(new Point()));
+        assertTrue(d1.goTo(new int[]{0, 0}));
 
         assertTrue(d1.goTo(0.0f, 0.0f));
         assertTrue(d1.goToMapPosition(0, 0));
 
-        assertTrue(d1.cleanArea(new Point(), new Point(), 1));
+        assertTrue(d1.cleanArea(new int[]{0, 0}, new int[]{0, 0}, 1));
         assertTrue(d1.cleanArea(0.0f, 0.0f, 1.0f, 1.0f, 1));
         assertTrue(d1.cleanAreaFromMap(0,0,1,1,1));
         assertTrue(d1.cleanAreaFromMap(1,1,0,0,1));
@@ -258,19 +257,31 @@ public class DeviceTest {
             assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
         }
         try {
-            d0.cleanArea(null, new Point(), 1);
+            d0.cleanArea(null, new int[]{0, 0}, 1);
             fail();
         } catch (CommandExecutionException e){
             assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
         }
         try {
-            d0.cleanArea(new Point(), null, 1);
+            d0.cleanArea(new int[]{0, 0}, null, 1);
             fail();
         } catch (CommandExecutionException e){
             assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
         }
         try {
-            d0.cleanArea(new Point(), new Point(), 0);
+            d0.cleanArea(new int[]{0, 0}, new int[]{0, 0}, 0);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.cleanArea(new int[]{0}, new int[]{0, 0}, 1);
+            fail();
+        } catch (CommandExecutionException e){
+            assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
+        }
+        try {
+            d0.cleanArea(new int[]{0, 0}, new int[]{0}, 1);
             fail();
         } catch (CommandExecutionException e){
             assertEquals(INVALID_PARAMETERS.cause, e.getError().cause);
