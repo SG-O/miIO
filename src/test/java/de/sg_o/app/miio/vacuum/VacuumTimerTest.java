@@ -17,20 +17,19 @@
 package de.sg_o.app.miio.vacuum;
 
 import de.sg_o.app.miio.base.CommandExecutionException;
+import org.joda.time.LocalTime;
 import org.json.JSONArray;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
 import java.util.HashSet;
 
 import static org.junit.Assert.*;
 
 public class VacuumTimerTest {
-    private LocalTime tm = LocalTime.of(10,0);
-    private HashSet<DayOfWeek> d =  new HashSet<>();
+    private LocalTime tm = new LocalTime(10,0);
+    private HashSet<VacuumTimer.DayOfWeek> d =  new HashSet<>();
     private JSONArray empty = new JSONArray();
     private VacuumTimer t0;
     private VacuumTimer t1;
@@ -40,8 +39,8 @@ public class VacuumTimerTest {
 
     @Before
     public void setUp() {
-        d.add(DayOfWeek.MONDAY);
-        d.add(DayOfWeek.THURSDAY);
+        d.add(VacuumTimer.DayOfWeek.MONDAY);
+        d.add(VacuumTimer.DayOfWeek.THURSDAY);
         empty.put("");
         empty.put("");
         t0 = new VacuumTimer("1234", true, tm, d, empty);
@@ -67,8 +66,8 @@ public class VacuumTimerTest {
         assertEquals(t2.getTime(), t6.getTime());
         assertNull(t2.getJob());
 
-        HashSet<DayOfWeek> dSingle =  new HashSet<>();
-        dSingle.add(DayOfWeek.SUNDAY);
+        HashSet<VacuumTimer.DayOfWeek> dSingle =  new HashSet<>();
+        dSingle.add(VacuumTimer.DayOfWeek.SUNDAY);
         VacuumTimer t7 = new VacuumTimer("1234", true, tm, dSingle, empty);
         VacuumTimer t8 = new VacuumTimer(t7.construct(true));
         assertEquals(t7, t8);
@@ -145,9 +144,9 @@ public class VacuumTimerTest {
     public void getTimeTest() {
         assertEquals(tm, t0.getTime());
         assertNull(t1.getTime());
-        assertEquals(LocalTime.of(12,30), t2.getTime());
-        assertEquals(LocalTime.of(23,59), t3.getTime());
-        assertEquals(LocalTime.of(0,0), t4.getTime());
+        assertEquals(new LocalTime(12,30), t2.getTime());
+        assertEquals(new LocalTime(23,59), t3.getTime());
+        assertEquals(new LocalTime(0,0), t4.getTime());
     }
 
     @Test
@@ -197,8 +196,8 @@ public class VacuumTimerTest {
 
     @Test
     public void toStringTest() {
-        HashSet<DayOfWeek> dSingle =  new HashSet<>();
-        dSingle.add(DayOfWeek.SUNDAY);
+        HashSet<VacuumTimer.DayOfWeek> dSingle =  new HashSet<>();
+        dSingle.add(VacuumTimer.DayOfWeek.SUNDAY);
         VacuumTimer t5 = new VacuumTimer("1234", true, tm, dSingle, empty);
         VacuumTimer t6 = new VacuumTimer("1234", true, tm, null, empty);
         assertEquals("VacuumTimer{ID='1234', enabled=true, time=10:00, runDays=[SUNDAY], job=[\"\",\"\"]}", t5.toString());

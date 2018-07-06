@@ -16,18 +16,18 @@
 
 package de.sg_o.app.miio.vacuum;
 
+import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.junit.Test;
 
 import java.io.*;
-import java.time.Instant;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertFalse;
 
 public class VacuumCleanupTest {
-    private Instant start = Instant.ofEpochSecond(Instant.now().getEpochSecond());
-    private Instant end = start.plusSeconds(300);
+    private Instant start = Instant.ofEpochSecond(Instant.now().getMillis() / 1000);
+    private Instant end = start.plus(300000);
     private VacuumCleanup c0 = new VacuumCleanup(start, end, 300, 2000, true);
     private VacuumCleanup c1 = new VacuumCleanup(null, end, 300, 2000, true);
     private VacuumCleanup c2 = new VacuumCleanup(start, null, 300, 2000, true);

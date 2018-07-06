@@ -16,10 +16,13 @@
 
 package de.sg_o.app.miio.vacuum;
 
+import org.joda.time.Instant;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 
 import java.io.Serializable;
-import java.time.Instant;
+
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
@@ -42,7 +45,7 @@ public class VacuumCleanup implements Serializable {
     public VacuumCleanup(Instant start, Instant end, long runtime, long area, boolean completed) {
         if (start == null || end == null || runtime < 0){
             start = Instant.now();
-            end = start.plusSeconds(1);
+            end = start.plus(1000);
             runtime = 1;
         }
         this.start = start;
@@ -60,11 +63,11 @@ public class VacuumCleanup implements Serializable {
     public VacuumCleanup(JSONArray msg) {
         if (msg == null){
             this.start = Instant.now();
-            this.end = start.plusSeconds(1);
+            this.end = start.plus(1000);
             this.runtime = 1;
         } else {
-            this.start = Instant.ofEpochSecond(msg.optLong(0, Instant.now().getEpochSecond()));
-            this.end = Instant.ofEpochSecond(msg.optLong(1, start.plusSeconds(1).getEpochSecond()));
+            this.start = Instant.ofEpochSecond(msg.optLong(0, Instant.now().getMillis()));
+            this.end = Instant.ofEpochSecond(msg.optLong(1, start.plus(1000).getMillis()));
             this.runtime = msg.optLong(2, 1);
             this.area = msg.optLong(3);
             this.completed = msg.optInt(5) == 1;
@@ -112,8 +115,8 @@ public class VacuumCleanup implements Serializable {
      */
     public JSONArray construct(){
         JSONArray ret = new JSONArray();
-        ret.put(start.getEpochSecond());
-        ret.put(end.getEpochSecond());
+        ret.put(start.getMillis() / 1000);
+        ret.put(end.getMillis() / 1000);
         ret.put(runtime);
         ret.put(area);
         ret.put(0);
@@ -141,8 +144,8 @@ public class VacuumCleanup implements Serializable {
     @Override
     public String toString() {
         return "VacuumCleanup{" +
-                "start=" + start +
-                ", end=" + end +
+                "start=" + start.toString(ISODateTimeFormat.dateTimeNoMillis()) +
+                ", end=" + end.toString(ISODateTimeFormat.dateTimeNoMillis()) +
                 ", runtime=" + runtime +
                 ", area=" + area +
                 ", completed=" + completed +

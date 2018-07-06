@@ -23,6 +23,7 @@ import de.sg_o.app.miio.server.Server;
 import de.sg_o.app.miio.serverTest.ServerGenericEvents;
 import de.sg_o.app.miio.serverTest.ServerVacuumEvents;
 import de.sg_o.app.miio.vacuum.*;
+import org.joda.time.LocalTime;
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -31,8 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.util.TimeZone;
 
 import static de.sg_o.app.miio.base.CommandExecutionException.Error.*;
 import static org.junit.Assert.*;
@@ -144,11 +144,11 @@ public class DeviceTest {
         assertTrue(d1.resetConsumable(VacuumConsumableStatus.Names.MAIN_BRUSH));
         assertEquals(0, d1.consumableStatus().getMainBrushWorkTime());
 
-        assertEquals(ZoneId.systemDefault(), d1.getTimezone());
-        assertTrue(d1.setTimezone(ZoneId.of("America/Los_Angeles")));
-        assertEquals(ZoneId.of("America/Los_Angeles"), d1.getTimezone());
-        assertTrue(d1.setTimezone(ZoneId.systemDefault()));
-        assertEquals(ZoneId.systemDefault(), d1.getTimezone());
+        assertEquals(TimeZone.getDefault(), d1.getTimezone());
+        assertTrue(d1.setTimezone(TimeZone.getTimeZone("America/Los_Angeles")));
+        assertEquals(TimeZone.getTimeZone("America/Los_Angeles"), d1.getTimezone());
+        assertTrue(d1.setTimezone(TimeZone.getDefault()));
+        assertEquals(TimeZone.getDefault(), d1.getTimezone());
 
         VacuumTimer t0 = new VacuumTimer(null, true, 14, 0, null);
         assertEquals(0, d1.getTimers().length);
@@ -161,8 +161,8 @@ public class DeviceTest {
         assertEquals(0, d1.getTimers().length);
 
         assertEquals(new VacuumDoNotDisturb(null, null), d1.getDoNotDisturb());
-        LocalTime start = LocalTime.of(12, 30);
-        LocalTime end = LocalTime.of(15, 30);
+        LocalTime start = new LocalTime(12, 30);
+        LocalTime end = new LocalTime(15, 30);
         assertTrue(d1.setDoNotDisturb(new VacuumDoNotDisturb(start, end)));
         assertEquals(new VacuumDoNotDisturb(start, end), d1.getDoNotDisturb());
         assertTrue(d1.getDoNotDisturb().isEnabled());

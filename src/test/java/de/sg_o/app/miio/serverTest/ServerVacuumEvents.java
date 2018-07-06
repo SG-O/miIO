@@ -18,19 +18,20 @@ package de.sg_o.app.miio.serverTest;
 
 import de.sg_o.app.miio.base.CommandExecutionException;
 import de.sg_o.app.miio.vacuum.*;
+import org.joda.time.Instant;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import de.sg_o.app.miio.server.OnServerEventListener;
 
-import java.time.Instant;
-import java.time.ZoneId;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TimeZone;
+
 
 public class ServerVacuumEvents implements OnServerEventListener {
     private VacuumStatus state = new VacuumStatus(null);
     private VacuumConsumableStatus consumables = new VacuumConsumableStatus(null);
-    private ZoneId timezone = ZoneId.systemDefault();
+    private TimeZone timezone = TimeZone.getDefault();
     private Map<String, VacuumTimer> timers = new LinkedHashMap<>();
     private VacuumDoNotDisturb dnd = new VacuumDoNotDisturb(null, null);
     private Map<Long, VacuumCleanup> cleanups = new LinkedHashMap<>();
@@ -143,7 +144,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
 
     private Object getTimezone(){
         JSONArray ret = new JSONArray();
-        ret.put(timezone.getId());
+        ret.put(timezone.getID());
         return ret;
     }
 
@@ -151,7 +152,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
         if(tz == null) return null;
         String zone = tz.optString(0, null);
         if (zone == null)  return null;
-        this.timezone = ZoneId.of(zone);
+        this.timezone = TimeZone.getTimeZone(zone);
         return ok();
     }
 
@@ -185,7 +186,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Object start()  {
         state.setState(VacuumStatus.State.CLEANING);
         Instant start = Instant.now();
-        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plusSeconds(200), 200, 30000, true));
+        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plus(200000), 200, 30000, true));
         return ok();
     }
 
@@ -207,7 +208,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Object spotCleaning() {
         state.setState(VacuumStatus.State.SPOT_CLEANUP);
         Instant start = Instant.now();
-        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plusSeconds(100), 100, 10000, true));
+        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plus(100000), 100, 10000, true));
         return ok();
     }
 
@@ -281,7 +282,7 @@ public class ServerVacuumEvents implements OnServerEventListener {
     private Object cleanArea(JSONArray values) {
         if (values == null) return null;
         Instant start = Instant.now();
-        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plusSeconds(150), 150, 20000, true));
+        cleanups.put((long) cleanups.size(), new VacuumCleanup(start, start.plus(150000), 150, 20000, true));
         state.setState(VacuumStatus.State.CLEANING_ZONE);
         return ok();
     }

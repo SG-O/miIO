@@ -17,20 +17,50 @@
 package de.sg_o.app.miio.vacuum;
 
 import de.sg_o.app.miio.base.CommandExecutionException;
+import org.joda.time.LocalTime;
 import org.json.JSONArray;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.time.DayOfWeek;
-import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("WeakerAccess")
 public class VacuumTimer implements Serializable {
+    public enum DayOfWeek {
+        SUNDAY(0),
+        MONDAY(1),
+        TUESDAY(2),
+        WEDNESDAY(3),
+        THURSDAY(4),
+        FRIDAY(5),
+        SATURDAY(6);
+
+        private final int value;
+        private static Map<Integer, DayOfWeek> map = new HashMap<>();
+
+        DayOfWeek(int value) {
+            this.value = value;
+        }
+
+        static {
+            for (DayOfWeek st : DayOfWeek.values()) {
+                map.put(st.value, st);
+            }
+        }
+
+        public static DayOfWeek valueOf(int number) {
+            DayOfWeek st = map.get(number);
+            if (st == null) return MONDAY;
+            return st;
+        }
+
+        public int getValue() {
+            return value;
+        }
+    }
+
     private static final long serialVersionUID = 4679120578276423163L;
 
     private String ID;
@@ -73,7 +103,7 @@ public class VacuumTimer implements Serializable {
         if (hour < 0) hour = 0;
         if (minute > 59) minute = 59;
         if (minute < 0) minute = 0;
-        this.time = LocalTime.of(hour,minute);
+        this.time = new LocalTime(hour,minute);
         if (runDays == null) runDays = new HashSet<>();
         this.runDays = runDays;
     }
@@ -113,7 +143,7 @@ public class VacuumTimer implements Serializable {
         try {
             int minute = Integer.valueOf(values[0]);
             int hour = Integer.valueOf(values[1]);
-            this.time = LocalTime.of(hour, minute);
+            this.time = new LocalTime(hour, minute);
         } catch (NumberFormatException ignore){
             throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
         }
@@ -124,8 +154,7 @@ public class VacuumTimer implements Serializable {
                     for (String day : dayValues) {
                         int d = Integer.valueOf(day);
                         if (d > 6) continue;
-                        if (d == 0) d = 7;
-                        runDays.add(DayOfWeek.of(d));
+                        runDays.add(DayOfWeek.valueOf(d));
                     }
                 } catch (NumberFormatException ignore) {
                     throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
@@ -140,7 +169,6 @@ public class VacuumTimer implements Serializable {
         if (runDays.size() > 0){
             for (DayOfWeek d : runDays) {
                 int dValue = d.getValue();
-                if (dValue == 7) dValue = 0;
                 days.append(dValue);
                 days.append(",");
             }
@@ -148,7 +176,7 @@ public class VacuumTimer implements Serializable {
         } else {
             days.append("*");
         }
-        return time.getMinute() + " " + time.getHour() + " * * " + days.toString();
+        return time.getMinuteOfHour() + " " + time.getHourOfDay() + " * * " + days.toString();
     }
 
     /**
@@ -263,7 +291,7 @@ public class VacuumTimer implements Serializable {
         return "VacuumTimer{" +
                 "ID='" + ID + '\'' +
                 ", enabled=" + enabled +
-                ", time=" + time +
+                ", time=" + time.toString("HH:mm") +
                 ", runDays=" + runDays +
                 ", job=" + job +
                 '}';

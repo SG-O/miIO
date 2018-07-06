@@ -24,7 +24,7 @@ import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.time.ZoneId;
+import java.util.TimeZone;
 
 public class Vacuum extends Device implements Serializable {
     private static final long serialVersionUID = -1408835747852889939L;
@@ -58,11 +58,11 @@ public class Vacuum extends Device implements Serializable {
      * @return The current timezone.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public ZoneId getTimezone() throws CommandExecutionException {
+    public TimeZone getTimezone() throws CommandExecutionException {
         JSONArray resp = sendToArray("get_timezone");
         String zone = resp.optString(0, null);
         if (zone == null ) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-        return ZoneId.of(zone);
+        return TimeZone.getTimeZone(zone);
     }
 
     /**
@@ -71,10 +71,10 @@ public class Vacuum extends Device implements Serializable {
      * @return True if the command has been received successfully.
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public boolean setTimezone(ZoneId zone) throws CommandExecutionException {
+    public boolean setTimezone(TimeZone zone) throws CommandExecutionException {
         if (zone == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_PARAMETERS);
         JSONArray tz = new JSONArray();
-        tz.put(zone.getId());
+        tz.put(zone.getID());
         return sendOk("set_timezone", tz);
     }
 

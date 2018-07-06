@@ -16,11 +16,11 @@
 
 package de.sg_o.app.miio.vacuum;
 
+import org.joda.time.LocalTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.time.LocalTime;
 import java.util.Objects;
 
 @SuppressWarnings("WeakerAccess")
@@ -38,9 +38,9 @@ public class VacuumDoNotDisturb implements Serializable {
      * @param enabled Weather the timer should be enabled.
      */
     public VacuumDoNotDisturb(LocalTime start, LocalTime end, boolean enabled) {
-        if (start == null) start = LocalTime.of(22, 0);
+        if (start == null) start = new LocalTime(22, 0);
         this.start = start;
-        if (end == null) end = LocalTime.of(8, 0);
+        if (end == null) end = new LocalTime(8, 0);
         this.end = end;
         this.enabled = enabled;
     }
@@ -51,9 +51,9 @@ public class VacuumDoNotDisturb implements Serializable {
      * @param end The end time of the the do not disturb period.
      */
     public VacuumDoNotDisturb(LocalTime start, LocalTime end) {
-        if (start == null) start = LocalTime.of(22, 0);
+        if (start == null) start = new LocalTime(22, 0);
         this.start = start;
-        if (end == null) end = LocalTime.of(8, 0);
+        if (end == null) end = new LocalTime(8, 0);
         this.end = end;
         this.enabled = true;
     }
@@ -65,12 +65,12 @@ public class VacuumDoNotDisturb implements Serializable {
     public VacuumDoNotDisturb(JSONArray dnd){
         JSONObject obj = dnd.optJSONObject(0);
         if (obj != null){
-            start = LocalTime.of(obj.optInt("start_hour"), obj.optInt("start_minute"));
-            end = LocalTime.of(obj.optInt("end_hour"), obj.optInt("end_minute"));
+            start = new LocalTime(obj.optInt("start_hour"), obj.optInt("start_minute"));
+            end = new LocalTime(obj.optInt("end_hour"), obj.optInt("end_minute"));
             enabled = obj.optInt("enabled", 1) == 1;
         } else {
-            start = LocalTime.of(dnd.optInt(0), dnd.optInt(1));
-            end = LocalTime.of(dnd.optInt(2), dnd.optInt(3));
+            start = new LocalTime(dnd.optInt(0), dnd.optInt(1));
+            end = new LocalTime(dnd.optInt(2), dnd.optInt(3));
             enabled = true;
         }
     }
@@ -120,17 +120,17 @@ public class VacuumDoNotDisturb implements Serializable {
         JSONArray dnd = new JSONArray();
         if (server){
             JSONObject srv = new JSONObject();
-            srv.put("start_hour", start.getHour());
-            srv.put("start_minute", start.getMinute());
-            srv.put("end_hour", end.getHour());
-            srv.put("end_minute", end.getMinute());
+            srv.put("start_hour", start.getHourOfDay());
+            srv.put("start_minute", start.getMinuteOfHour());
+            srv.put("end_hour", end.getHourOfDay());
+            srv.put("end_minute", end.getMinuteOfHour());
             srv.put("enabled", enabled ? 1 : 0);
             dnd.put(srv);
         } else {
-            dnd.put(start.getHour());
-            dnd.put(start.getMinute());
-            dnd.put(end.getHour());
-            dnd.put(end.getMinute());
+            dnd.put(start.getHourOfDay());
+            dnd.put(start.getMinuteOfHour());
+            dnd.put(end.getHourOfDay());
+            dnd.put(end.getMinuteOfHour());
         }
         return dnd;
     }
@@ -153,8 +153,8 @@ public class VacuumDoNotDisturb implements Serializable {
     @Override
     public String toString() {
         return "VacuumDoNotDisturb{" +
-                "start=" + start +
-                ", end=" + end +
+                "start=" + start.toString("HH:mm") +
+                ", end=" + end.toString("HH:mm") +
                 ", enabled=" + enabled +
                 '}';
     }

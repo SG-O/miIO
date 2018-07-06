@@ -16,18 +16,18 @@
 
 package de.sg_o.app.miio.vacuum;
 
+import org.joda.time.LocalTime;
 import org.junit.Test;
 
 import java.io.*;
-import java.time.LocalTime;
 
 import static org.junit.Assert.*;
 
 public class VacuumDoNotDisturbTest {
-    private LocalTime start = LocalTime.of(15, 30);
-    private LocalTime startFb = LocalTime.of(22, 0);
-    private LocalTime end = LocalTime.of(21, 30);
-    private LocalTime endFb = LocalTime.of(8, 0);
+    private LocalTime start = new LocalTime(15, 30);
+    private LocalTime startFb = new LocalTime(22, 0);
+    private LocalTime end = new LocalTime(21, 30);
+    private LocalTime endFb = new LocalTime(8, 0);
 
     private VacuumDoNotDisturb d0 = new VacuumDoNotDisturb(start, end);
     private VacuumDoNotDisturb d1 = new VacuumDoNotDisturb(null, null);
