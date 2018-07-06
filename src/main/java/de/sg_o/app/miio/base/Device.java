@@ -27,10 +27,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @SuppressWarnings("WeakerAccess")
 public class Device implements Serializable {
@@ -334,10 +331,13 @@ public class Device implements Serializable {
                 continue;
             }
 
-            networkInterface.getInterfaceAddresses().stream()
-                    .map(InterfaceAddress::getBroadcast)
-                    .filter(Objects::nonNull)
-                    .forEach(broadcastList::add);
+            for (InterfaceAddress address : networkInterface.getInterfaceAddresses()) {
+                if (address == null) continue;
+                InetAddress broadcast = address.getBroadcast();
+                if (broadcast != null) {
+                    broadcastList.add(broadcast);
+                }
+            }
         }
         return broadcastList;
     }
